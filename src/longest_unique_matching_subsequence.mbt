@@ -8,11 +8,11 @@ pub fn[T : Eq + Hash] longest_unique_matching_subsequence(
     capacity=matchs.length(),
   )
   for place = 0; place < matchs.length(); place = place + 1 {
-    let (_, old_idx) = matchs[place]
+    let (_, new_idx) = matchs[place]
     if piles.is_empty() {
-      piles.put_back(BackPointer::{ value: (old_idx, place), prev: None })
+      piles.put_back(BackPointer::{ value: (new_idx, place), prev: None })
     } else {
-      piles.put_by_binary_search(old_idx~, place~)
+      piles.put_by_binary_search(new_idx~, place~)
     }
   }
   guard piles.last() is Some(head) else { return [] }

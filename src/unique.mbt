@@ -9,7 +9,6 @@ fn[T : Eq + Hash] find_unique(
     mut new_idx : Int
     mut new_count : Int
   }
-  // assume hashmap preserve insert order
   let match_lines = @hashmap.new()
   for i = 0; i < old.length(); i = i + 1 {
     if match_lines.contains(old[i]) {
@@ -41,6 +40,6 @@ fn[T : Eq + Hash] find_unique(
     let (_, record) = pair
     unique_match_lines.push((record.old_idx, record.new_idx))
   }
-  // unique_match_lines.sort_by_key(fn { (old_idx, _) => old_idx })
+  unique_match_lines.sort_by_key(pair => pair.0)
   return unique_match_lines
 }

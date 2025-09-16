@@ -27,14 +27,14 @@ fn[T] op_get(self : Piles[T], i : Int) -> Pile[T] {
 ///|
 fn put_by_binary_search(
   self : Piles[BackPointer[(Int, Int)]],
-  old_idx~ : Int,
+  new_idx~ : Int,
   place~ : Int,
 ) -> Unit {
   let mut lo = -1
   let mut hi = self.inner().length()
   while lo + 1 < hi {
     let mid = (lo + hi) / 2
-    if self[mid].top.value.0 < old_idx {
+    if self[mid].top.value.0 < new_idx {
       lo = mid
     } else {
       hi = mid
@@ -43,9 +43,9 @@ fn put_by_binary_search(
   if lo >= 0 {
     let prev = Some(self[lo].top)
     if lo + 1 < self.inner().length() {
-      self[lo + 1].push(BackPointer::{ value: (old_idx, place), prev })
+      self[lo + 1].push(BackPointer::{ value: (new_idx, place), prev })
     } else {
-      self.put_back(BackPointer::{ value: (old_idx, place), prev })
+      self.put_back(BackPointer::{ value: (new_idx, place), prev })
     }
   }
 }
