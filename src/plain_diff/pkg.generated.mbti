@@ -2,6 +2,7 @@
 package "myfreess/patdiff/plain_diff"
 
 // Values
+fn[T : Eq + Hash] iter_matches(cutoff? : Int, (Int, Int) -> Unit, Array[T], Array[T]) -> Unit
 
 // Errors
 
