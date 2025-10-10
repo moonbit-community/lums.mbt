@@ -37,7 +37,7 @@ priv struct Partition {
 ///
 /// If we return the "wrong" partitions, the worst this can do is cause suboptimal diff
 /// output. It cannot cause incorrect diff output.
-fn[T : Eq] diag(
+fn[T] diag(
   fd~ : Array[Int],
   bd~ : Array[Int],
   sh~ : Int,
@@ -214,7 +214,7 @@ fn[T : Eq] diag(
 
 ///|
 /// Main diff loop that computes the differences between two arrays
-fn[T : Eq] diff_loop(
+fn[T] diff_loop(
   cutoff : Int?,
   a : Array[T],
   ai : Array[Int],
