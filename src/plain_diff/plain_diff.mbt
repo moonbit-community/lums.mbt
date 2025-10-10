@@ -29,6 +29,14 @@ priv struct Partition {
 /// If `find_minimal` is true, find the minimal edit script regardless of expense.
 /// Otherwise, if the search is too expensive, use heuristics to stop the search and report
 /// a suboptimal answer.
+/// 
+/// This function assumes that the first elements of the specified portions of the two
+/// vectors do not match, and likewise that the last elements do not match. The caller must
+/// trim matching elements from the beginning and end of the portions it is going to
+/// specify.
+///
+/// If we return the "wrong" partitions, the worst this can do is cause suboptimal diff
+/// output. It cannot cause incorrect diff output.
 fn[T : Eq] diag(
   fd~ : Array[Int],
   bd~ : Array[Int],
@@ -48,7 +56,7 @@ fn[T : Eq] diag(
   let bmid = xlim - ylim // center diagonal of backward search
   // southeast corner is on an odd diagonal w.r.t the northwest
   let odd = ((fmid - bmid) & 1) != 0
-  // [sh] is an offset that lets us use indices in [-(m+1), n+1]
+  // `sh` is an offset that lets us use indices in [-(m+1), n+1]
   fd[sh + fmid] = xoff
   bd[sh + bmid] = xlim
 
