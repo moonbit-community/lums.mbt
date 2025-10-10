@@ -10,6 +10,7 @@
 ///
 /// `lo_minimal` is true iff the minimal edit script for the left half of the partition is
 /// known; similarly for `hi_minimal`.
+#valtype
 priv struct Partition {
   xmid : Int
   ymid : Int
