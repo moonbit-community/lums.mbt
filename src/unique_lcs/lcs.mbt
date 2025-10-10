@@ -1,5 +1,5 @@
 ///|
-pub fn[T : Eq + Hash] longest_unique_matching_subsequence(
+pub fn[T : Eq + Hash] unique_lcs(
   old~ : ArrayView[T],
   new~ : ArrayView[T],
 ) -> Array[(Int, Int)] {

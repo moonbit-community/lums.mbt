@@ -1,1 +1,1 @@
-# longest unique matching subsequence
+# patdiff.mbt
