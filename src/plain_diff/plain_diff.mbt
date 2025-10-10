@@ -88,7 +88,9 @@ fn[T : Eq] diag(
         // Find matching sequences
         let mut x_cur = x
         let mut y_cur = x_cur - d
-        while x_cur < xlim && y_cur < ylim && xv(x_cur) == yv(y_cur) {
+        while x_cur < xlim &&
+              y_cur < ylim &&
+              physical_equal(xv(x_cur), yv(y_cur)) {
           x_cur += 1
           y_cur += 1
         }
@@ -134,7 +136,9 @@ fn[T : Eq] diag(
         // Find matching sequences backwards
         let mut x_cur = x
         let mut y_cur = x_cur - d
-        while x_cur > xoff && y_cur > yoff && xv(x_cur - 1) == yv(y_cur - 1) {
+        while x_cur > xoff &&
+              y_cur > yoff &&
+              physical_equal(xv(x_cur - 1), yv(y_cur - 1)) {
           x_cur -= 1
           y_cur -= 1
         }
@@ -255,7 +259,7 @@ fn[T : Eq] diff_loop(
     // Skip matching prefix
     let mut xoff = xoff
     let mut yoff = yoff
-    while xoff < xlim && yoff < ylim && xvec(xoff) == yvec(yoff) {
+    while xoff < xlim && yoff < ylim && physical_equal(xvec(xoff), yvec(yoff)) {
       xoff += 1
       yoff += 1
     }
@@ -263,7 +267,9 @@ fn[T : Eq] diff_loop(
     // Skip matching suffix
     let mut xlim = xlim
     let mut ylim = ylim
-    while xlim > xoff && ylim > yoff && xvec(xlim - 1) == yvec(ylim - 1) {
+    while xlim > xoff &&
+          ylim > yoff &&
+          physical_equal(xvec(xlim - 1), yvec(ylim - 1)) {
       xlim -= 1
       ylim -= 1
     }
