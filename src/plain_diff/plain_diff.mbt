@@ -159,7 +159,7 @@ fn[T] diag(
         None => ()
       }
 
-      // Heuristic: if we've gone well beyond the call of duty, give up and report halfway
+      // Heuristic: if we've gone well beyond the call of duty, give up and report halfway between our best results so far.
       if not(find_minimal) && c >= too_expensive {
         // Find forward diagonal that maximizes x + y
         let mut fxybest = -1
