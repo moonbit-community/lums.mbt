@@ -177,7 +177,7 @@ fn[T] diag(
         }
 
         // Find backward diagonal that minimizes x + y
-        let mut bxybest = 0x7FFFFFFF
+        let mut bxybest = @int.max_value
         let mut bxbest = bmax
         let mut d = bmax
         while d >= bmin {
