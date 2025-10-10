@@ -318,6 +318,9 @@ fn[T : Eq] diff_loop(
 /// present in `b`; this way, the main algorithm can skip items which, anyway, are
 /// different. This improves the speed much. At the same time, this function updates the
 /// items of `a` and `b` so that all equal items point to the same unique item.
+/// 
+/// All item comparisons in the main algorithm can therefore be done with `physical_equal` 
+/// instead of `==`, which can improve speed much.
 fn[T : Eq + Hash] make_indexer(a : Array[T], b : Array[T]) -> Array[Int] {
   let n = a.length()
   let htb : Map[T, T] = Map::new()
