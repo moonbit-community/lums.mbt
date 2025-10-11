@@ -387,10 +387,10 @@ fn[T : Eq + Hash] diff(
 pub fn[T : Eq + Hash] iter_matches(
   cutoff? : Int,
   f : (Int, Int) -> Unit,
-  a : Array[T],
-  b : Array[T],
+  old~ : Array[T],
+  new~ : Array[T],
 ) -> Unit {
-  let (d1, d2) = diff(cutoff, a, b)
+  let (d1, d2) = diff(cutoff, old, new)
   fn aux(i1 : Int, i2 : Int) -> Unit {
     if i1 >= d1.length() || i2 >= d2.length() {
       ()
