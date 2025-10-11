@@ -376,12 +376,12 @@ fn[T : Eq + Hash] diff(
 }
 
 ///|
-/// `iter_matches(?cutoff, f, a, b)` diffs the arrays `a` and `b` (as in /usr/bin/diff),
+/// `iter_matches(?cutoff, old~, new~, fn)` diffs the arrays `old~` and `new~` (as in /usr/bin/diff),
 /// and calls `f` on each element of the longest common subsequence in
-/// increasing order. The arguments of `f` are the indices in `a` and `b`, respectively,
+/// increasing order. The arguments of `f` are the indices in `old~` and `new~`, respectively,
 /// of that element.
 ///
-/// The `cutoff` is an upper bound on the minimum edit distance between `a` and `b`. When
+/// The `cutoff` is an upper bound on the minimum edit distance between `old~` and `new~`. When
 /// `cutoff` is exceeded, `iter_matches` returns a correct, but not necessarily minimal
 /// diff. It defaults to about `sqrt(a.length() + b.length())`.
 pub fn[T : Eq + Hash] iter_matches(
