@@ -113,13 +113,13 @@ fn[T] diag(
 
       // Similarly extend the backward search
       let bmin = if bmin > dmin {
-        bd[sh + bmin - 2] = 0x7FFFFFFF // Int.max_value equivalent
+        bd[sh + bmin - 2] = @int.max_value
         bmin - 1
       } else {
         bmin + 1
       }
       let bmax = if bmax < dmax {
-        bd[sh + bmax + 2] = 0x7FFFFFFF
+        bd[sh + bmax + 2] = @int.max_value
         bmax + 1
       } else {
         bmax - 1
