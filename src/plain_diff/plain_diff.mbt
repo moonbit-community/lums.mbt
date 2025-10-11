@@ -37,7 +37,7 @@ priv struct Partition {
 ///
 /// If we return the "wrong" partitions, the worst this can do is cause suboptimal diff
 /// output. It cannot cause incorrect diff output.
-fn[T : Eq] diag(
+fn[T] diag(
   fd~ : Array[Int],
   bd~ : Array[Int],
   sh~ : Int,
@@ -88,7 +88,9 @@ fn[T : Eq] diag(
         // Find matching sequences
         let mut x_cur = x
         let mut y_cur = x_cur - d
-        while x_cur < xlim && y_cur < ylim && xv(x_cur) == yv(y_cur) {
+        while x_cur < xlim &&
+              y_cur < ylim &&
+              physical_equal(xv(x_cur), yv(y_cur)) {
           x_cur += 1
           y_cur += 1
         }
@@ -134,7 +136,9 @@ fn[T : Eq] diag(
         // Find matching sequences backwards
         let mut x_cur = x
         let mut y_cur = x_cur - d
-        while x_cur > xoff && y_cur > yoff && xv(x_cur - 1) == yv(y_cur - 1) {
+        while x_cur > xoff &&
+              y_cur > yoff &&
+              physical_equal(xv(x_cur - 1), yv(y_cur - 1)) {
           x_cur -= 1
           y_cur -= 1
         }
@@ -155,7 +159,7 @@ fn[T : Eq] diag(
         None => ()
       }
 
-      // Heuristic: if we've gone well beyond the call of duty, give up and report halfway
+      // Heuristic: if we've gone well beyond the call of duty, give up and report halfway between our best results so far.
       if not(find_minimal) && c >= too_expensive {
         // Find forward diagonal that maximizes x + y
         let mut fxybest = -1
@@ -173,7 +177,7 @@ fn[T : Eq] diag(
         }
 
         // Find backward diagonal that minimizes x + y
-        let mut bxybest = 0x7FFFFFFF
+        let mut bxybest = @int.max_value
         let mut bxbest = bmax
         let mut d = bmax
         while d >= bmin {
@@ -210,7 +214,7 @@ fn[T : Eq] diag(
 
 ///|
 /// Main diff loop that computes the differences between two arrays
-fn[T : Eq] diff_loop(
+fn[T] diff_loop(
   cutoff : Int?,
   a : Array[T],
   ai : Array[Int],
@@ -255,7 +259,7 @@ fn[T : Eq] diff_loop(
     // Skip matching prefix
     let mut xoff = xoff
     let mut yoff = yoff
-    while xoff < xlim && yoff < ylim && xvec(xoff) == yvec(yoff) {
+    while xoff < xlim && yoff < ylim && physical_equal(xvec(xoff), yvec(yoff)) {
       xoff += 1
       yoff += 1
     }
@@ -263,7 +267,9 @@ fn[T : Eq] diff_loop(
     // Skip matching suffix
     let mut xlim = xlim
     let mut ylim = ylim
-    while xlim > xoff && ylim > yoff && xvec(xlim - 1) == yvec(ylim - 1) {
+    while xlim > xoff &&
+          ylim > yoff &&
+          physical_equal(xvec(xlim - 1), yvec(ylim - 1)) {
       xlim -= 1
       ylim -= 1
     }
@@ -318,6 +324,9 @@ fn[T : Eq] diff_loop(
 /// present in `b`; this way, the main algorithm can skip items which, anyway, are
 /// different. This improves the speed much. At the same time, this function updates the
 /// items of `a` and `b` so that all equal items point to the same unique item.
+/// 
+/// All item comparisons in the main algorithm can therefore be done with `physical_equal` 
+/// instead of `==`, which can improve speed much.
 fn[T : Eq + Hash] make_indexer(a : Array[T], b : Array[T]) -> Array[Int] {
   let n = a.length()
   let htb : Map[T, T] = Map::new()

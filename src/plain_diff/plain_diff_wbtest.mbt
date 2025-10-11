@@ -1,0 +1,17 @@
+///|
+test {
+  let a = ['a', 'b', 'c', 'd', 'e', 'f', 'a'].map(String::make(3, _))
+  let b = ['a', 'b', 'x', 'y', 'e', 'f'].map(String::make(3, _))
+  assert_false(physical_equal(a[0], b[0]))
+  assert_false(physical_equal(a[6], b[0]))
+  assert_false(physical_equal(a[0], a[6]))
+  assert_false(physical_equal(a[1], b[1]))
+  assert_false(physical_equal(a[4], b[4]))
+  inspect(make_indexer(a, b), content="[0, 1, 4, 5, 6]")
+  // after call make_indexer, equal items are physically equal
+  assert_true(physical_equal(a[0], b[0]))
+  assert_true(physical_equal(a[6], b[0]))
+  assert_true(physical_equal(a[0], a[6]))
+  assert_true(physical_equal(a[1], b[1]))
+  assert_true(physical_equal(a[4], b[4]))
+}
