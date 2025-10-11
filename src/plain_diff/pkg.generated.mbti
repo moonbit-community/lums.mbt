@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "myfreess/patdiff/plain_diff"
+package "myfreess/piediff/plain_diff"
 
 // Values
 fn[T : Eq + Hash] iter_matches(cutoff? : Int, (Int, Int) -> Unit, old~ : Array[T], new~ : Array[T]) -> Unit
