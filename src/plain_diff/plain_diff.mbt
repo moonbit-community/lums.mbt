@@ -464,36 +464,33 @@ fn[T : Eq + Hash] diff(
 /// diff. It defaults to about `sqrt(a.length() + b.length())`.
 pub fn[T : Eq + Hash] iter_matches(
   cutoff? : Int, // optional computation cost limit
-  f : (Int, Int) -> Unit, // function called for each matching element
   old~ : Array[T], // original array
   new~ : Array[T], // new array
-) -> Unit {
+) -> Iter2[Int, Int] {
   // First compute difference markers
   let (d1, d2) = diff(cutoff, old, new)
-
-  // Auxiliary recursive function: traverse two arrays, find unchanged element pairs
-  fn aux(i1 : Int, i2 : Int) -> Unit {
-    if i1 >= d1.length() || i2 >= d2.length() {
-      () // reached end of arrays
-    } else if not(d1[i1]) {
-      // old[i1] unchanged
-      if not(d2[i2]) {
-        // new[i2] also unchanged - found matching pair
-        f(i1, i2)
-        aux(i1 + 1, i2 + 1) // advance both
+  Iter2::new(fn(yield_) {
+    // traverse two arrays, find unchanged element pairs
+    for i1 = 0, i2 = 0 {
+      if i1 >= d1.length() || i2 >= d2.length() {
+        return IterEnd // reached end of arrays
+      } else if not(d1[i1]) {
+        // old[i1] unchanged
+        if not(d2[i2]) {
+          // new[i2] also unchanged - found matching pair
+          guard yield_(i1, i2) is IterContinue else { return IterEnd }
+          continue i1 + 1, i2 + 1 // advance both
+        } else {
+          // new[i2] changed (insertion) - skip element in new
+          continue i1, i2 + 1
+        }
+      } else if not(d2[i2]) {
+        // old[i1] changed but new[i2] didn't (deletion) - skip element in old  
+        continue i1 + 1, i2
       } else {
-        // new[i2] changed (insertion) - skip element in new
-        aux(i1, i2 + 1)
+        // both elements changed - advance both to find next possible match
+        continue i1 + 1, i2 + 1
       }
-    } else if not(d2[i2]) {
-      // old[i1] changed but new[i2] didn't (deletion) - skip element in old  
-      aux(i1 + 1, i2)
-    } else {
-      // both elements changed - advance both to find next possible match
-      aux(i1 + 1, i2 + 1)
     }
-  }
-
-  // Start traversing from beginning of arrays
-  aux(0, 0)
+  })
 }
