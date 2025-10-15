@@ -19,8 +19,14 @@ fn print_edits(
     prev_new_idx = new_idx + 1
   }
   match cutoff {
-    Some(cutoff) => @plain_diff.iter_matches(cutoff~, old~, new~, callback)
-    None => @plain_diff.iter_matches(old~, new~, callback)
+    Some(cutoff) =>
+      for old_idx, new_idx in @plain_diff.iter_matches(cutoff~, old~, new~) {
+        callback(old_idx, new_idx)
+      }
+    None =>
+      for old_idx, new_idx in @plain_diff.iter_matches(old~, new~) {
+        callback(old_idx, new_idx)
+      }
   }
   for i in prev_old_idx..<old.length() {
     result.push("-  " + old[i])
@@ -303,11 +309,9 @@ test "integer arrays diff" {
   let old = [1, 2, 3, 4, 5]
   let new = [1, 3, 5, 6, 7]
   let result = Array::new()
-  @plain_diff.iter_matches(
-    fn(old_idx, new_idx) { result.push((old_idx, new_idx)) },
-    old~,
-    new~,
-  )
+  for old_idx, new_idx in @plain_diff.iter_matches(old~, new~) {
+    result.push((old_idx, new_idx))
+  }
 
   // Should find matching elements: (0,0)=1, (2,1)=3, (4,2)=5
   inspect(result, content="[(0, 0), (2, 1), (4, 2)]")
@@ -375,15 +379,11 @@ test "iter_matches callback verification" {
   let matches = Array::new()
   let old_indices = Array::new()
   let new_indices = Array::new()
-  @plain_diff.iter_matches(
-    fn(old_idx, new_idx) {
-      matches.push((old_idx, new_idx))
-      old_indices.push(old_idx)
-      new_indices.push(new_idx)
-    },
-    old~,
-    new~,
-  )
+  for old_idx, new_idx in @plain_diff.iter_matches(old~, new~) {
+    matches.push((old_idx, new_idx))
+    old_indices.push(old_idx)
+    new_indices.push(new_idx)
+  }
 
   // Verify that matched elements are indeed equal
   for i = 0; i < matches.length(); i = i + 1 {
@@ -403,11 +403,9 @@ test "string array edge cases" {
   let old = ["", "a", "", "b", ""]
   let new = ["", "b", "", "a", ""]
   let result = Array::new()
-  @plain_diff.iter_matches(
-    fn(old_idx, new_idx) { result.push((old_idx, new_idx)) },
-    old~,
-    new~,
-  )
+  for old_idx, new_idx in @plain_diff.iter_matches(old~, new~) {
+    result.push((old_idx, new_idx))
+  }
 
   // Should find some matches (empty strings will match)
   inspect(result.length() > 0, content="true")
@@ -425,11 +423,9 @@ test "large array performance" {
     new[i] = if i % 2 == 0 { i } else { i + 100 } // Half same, half different
   }
   let match_count = Ref::new(0)
-  @plain_diff.iter_matches(
-    fn(_old_idx, _new_idx) { match_count.val = match_count.val + 1 },
-    old~,
-    new~,
-  )
+  for _old_idx, _new_idx in @plain_diff.iter_matches(old~, new~) {
+    match_count.val = match_count.val + 1
+  }
 
   // Should find approximately half matches
   inspect(match_count.val > 10, content="true")
@@ -488,19 +484,15 @@ test "iter_matches parameter order" {
   let new = ['a', 'x', 'c'].map(String::make(3, _))
   let matches = Array::new()
   let all_equal = Ref::new(true)
-  @plain_diff.iter_matches(
-    fn(old_idx, new_idx) {
-      // Verify parameter order: old_idx should correspond to old array, new_idx to new array
-      let old_val = old[old_idx]
-      let new_val = new[new_idx]
-      if old_val != new_val {
-        all_equal.val = false
-      }
-      matches.push("old[\{old_idx}]=\{old_val}, new[\{new_idx}]=\{new_val}")
-    },
-    old~,
-    new~,
-  )
+  for old_idx, new_idx in @plain_diff.iter_matches(old~, new~) {
+    // Verify parameter order: old_idx should correspond to old array, new_idx to new array
+    let old_val = old[old_idx]
+    let new_val = new[new_idx]
+    if old_val != new_val {
+      all_equal.val = false
+    }
+    matches.push("old[\{old_idx}]=\{old_val}, new[\{new_idx}]=\{new_val}")
+  }
 
   // Verify that all matched elements are indeed equal
   assert_true(all_equal.val)
@@ -513,11 +505,9 @@ test "repeated subsequence" {
   let old = ['a', 'b', 'a', 'b', 'c'].map(String::make(3, _))
   let new = ['a', 'b', 'c', 'a', 'b'].map(String::make(3, _))
   let result = Array::new()
-  @plain_diff.iter_matches(
-    fn(old_idx, new_idx) { result.push((old_idx, new_idx)) },
-    old~,
-    new~,
-  )
+  for old_idx, new_idx in @plain_diff.iter_matches(old~, new~) {
+    result.push((old_idx, new_idx))
+  }
 
   // Verify that some matches were found
   inspect(result.length() >= 3, content="true")
@@ -530,21 +520,15 @@ test "diff symmetry test" {
 
   // Calculate diff from arr1 -> arr2
   let matches1 = Array::new()
-  @plain_diff.iter_matches(
-    fn(old_idx, new_idx) { matches1.push((old_idx, new_idx)) },
-    old=arr1,
-    new=arr2,
-  )
+  for old_idx, new_idx in @plain_diff.iter_matches(old=arr1, new=arr2) {
+    matches1.push((old_idx, new_idx))
+  }
 
   // Calculate diff from arr2 -> arr1
   let matches2 = Array::new()
-  @plain_diff.iter_matches(
-    fn(old_idx, new_idx) {
-      matches2.push((new_idx, old_idx)) // Note parameter order is swapped
-    },
-    old=arr2,
-    new=arr1,
-  )
+  for old_idx, new_idx in @plain_diff.iter_matches(old=arr2, new=arr1) {
+    matches2.push((old_idx, new_idx))
+  }
 
   // Both directions should have the same number of matches
   assert_eq(matches1.length(), matches2.length())

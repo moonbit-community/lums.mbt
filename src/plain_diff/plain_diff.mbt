@@ -12,10 +12,10 @@
 /// known; similarly for `hi_minimal`.
 #valtype
 priv struct Partition {
-  xmid : Int
-  ymid : Int
-  lo_minimal : Bool
-  hi_minimal : Bool
+  xmid : Int // position of midpoint in sequence A
+  ymid : Int // position of midpoint in sequence B
+  lo_minimal : Bool // whether left half is optimal
+  hi_minimal : Bool // whether right half is optimal
 }
 
 ///|
@@ -37,103 +37,141 @@ priv struct Partition {
 ///
 /// If we return the "wrong" partitions, the worst this can do is cause suboptimal diff
 /// output. It cannot cause incorrect diff output.
+///
+/// Parameter mapping to Myers algorithm concepts:
+/// - fd~: forward search diagonal array, fd[k] stores the farthest x coordinate reachable on diagonal k
+/// - bd~: backward search diagonal array, bd[k] stores the nearest x coordinate reachable on diagonal k  
+/// - sh~: array index offset, supporting negative diagonal indices (since k can be negative)
+/// - xv~, yv~: functions to access elements of sequences A and B, supporting indirect access
+/// - xoff~, xlim~: search range for sequence A [xoff, xlim)
+/// - yoff~, ylim~: search range for sequence B [yoff, ylim)  
+/// - too_expensive~: computation cost upper limit, preventing algorithm from running too long in difficult cases
+/// - find_minimal~: whether to force finding minimal edit script (regardless of computation cost)
+/// 
 fn[T] diag(
-  fd~ : Array[Int],
-  bd~ : Array[Int],
-  sh~ : Int,
-  xv~ : (Int) -> T,
-  yv~ : (Int) -> T,
-  xoff~ : Int,
-  xlim~ : Int,
-  yoff~ : Int,
-  ylim~ : Int,
-  too_expensive~ : Int,
-  find_minimal~ : Bool,
+  fd~ : Array[Int], // forward search diagonal array - stores farthest reachable point on each diagonal
+  bd~ : Array[Int], // backward search diagonal array - stores nearest reachable point on each diagonal
+  sh~ : Int, // array index offset - enables arrays to support negative indices
+  xv~ : (Int) -> T, // access function for sequence A - supports indirect access and index remapping
+  yv~ : (Int) -> T, // access function for sequence B - supports indirect access and index remapping
+  xoff~ : Int, // starting position of sequence A - defines left boundary of search window
+  xlim~ : Int, // ending position of sequence A - defines right boundary of search window
+  yoff~ : Int, // starting position of sequence B - defines upper boundary of search window  
+  ylim~ : Int, // ending position of sequence B - defines lower boundary of search window
+  too_expensive~ : Int, // computation cost threshold - use heuristic algorithm when exceeded
+  find_minimal~ : Bool, // optimality flag - whether optimal solution must be found
 ) -> Partition {
-  let dmin = xoff - ylim // minimum valid diagonal
-  let dmax = xlim - yoff // maximum valid diagonal
-  let fmid = xoff - yoff // center diagonal of forward search
-  let bmid = xlim - ylim // center diagonal of backward search
-  // southeast corner is on an odd diagonal w.r.t the northwest
-  let odd = ((fmid - bmid) & 1) != 0
-  // `sh` is an offset that lets us use indices in [-(m+1), n+1]
-  fd[sh + fmid] = xoff
-  bd[sh + bmid] = xlim
+  // Calculate range of valid diagonals
+  // In edit graph, diagonal k = x - y, valid range determined by search window
+  let dmin = xoff - ylim // minimum valid diagonal - corresponds to maximum insertions
+  let dmax = xlim - yoff // maximum valid diagonal - corresponds to maximum deletions
+  let fmid = xoff - yoff // center diagonal for forward search - diagonal corresponding to starting point
+  let bmid = xlim - ylim // center diagonal for backward search - diagonal corresponding to end point
 
-  // Main loop with cost counter
+  // Determine parity: whether southeast corner is on odd diagonal relative to northwest corner
+  // This determines when forward and backward searches meet (they meet in same step only when parity differs)
+  let odd = ((fmid - bmid) & 1) != 0
+
+  // Initialize search starting points
+  // sh is offset, enabling us to use indices in range [-(m+1), n+1]
+  fd[sh + fmid] = xoff // forward search starts from (xoff, yoff)
+  bd[sh + bmid] = xlim // backward search starts from (xlim, ylim)
+
+  // Main loop: alternate forward and backward search, increasing edit distance by one each time
+  // c: current edit distance (search depth)
+  // fmin, fmax: diagonal range for forward search
+  // bmin, bmax: diagonal range for backward search
   loop (1, fmid, fmid, bmid, bmid) {
     (c, fmin, fmax, bmin, bmax) => {
-      // Extend the forward search by one edit step in each diagonal
+      // Extend diagonal range for forward search
+      // Each iteration expands search range as edit distance increases by 1
       let fmin = if fmin > dmin {
-        fd[sh + fmin - 2] = -1
-        fmin - 1
+        fd[sh + fmin - 2] = -1 // mark unused diagonal
+        fmin - 1 // extend to next diagonal
       } else {
-        fmin + 1
+        fmin + 1 // boundary constraint
       }
       let fmax = if fmax < dmax {
-        fd[sh + fmax + 2] = -1
-        fmax + 1
+        fd[sh + fmax + 2] = -1 // mark unused diagonal  
+        fmax + 1 // extend to previous diagonal
       } else {
-        fmax - 1
+        fmax - 1 // boundary constraint
       }
 
-      // Process forward diagonals - check for early return
+      // Process all diagonals for forward search
       let mut forward_result : Partition? = None
       let mut d = fmax
       while d >= fmin {
+        // Get farthest reachable points on adjacent diagonals
+        // tlo: x coordinate on lower-left diagonal (d-1), position after deletion
+        // thi: x coordinate on upper-right diagonal (d+1), position after insertion
         let tlo = fd[sh + d - 1]
         let thi = fd[sh + d + 1]
+
+        // Choose better path: transfer from diagonal that reaches farther x coordinate
+        // This embodies Myers algorithm's greedy strategy: prioritize paths that go farther
         let x = if tlo >= thi { tlo + 1 } else { thi }
 
-        // Find matching sequences
+        // Search for matching sequence along diagonal (Snake)
+        // This is key optimization of Myers algorithm: freely extend matching elements
         let mut x_cur = x
-        let mut y_cur = x_cur - d
+        let mut y_cur = x_cur - d // from diagonal relation k = x - y, we get y = x - k
         while x_cur < xlim &&
               y_cur < ylim &&
               physical_equal(xv(x_cur), yv(y_cur)) {
           x_cur += 1
           y_cur += 1
         }
+
+        // Update farthest reachable point on current diagonal
         fd[sh + d] = x_cur
+
+        // Check if meeting with backward search
+        // Meeting conditions: parity matches && diagonal is in backward search range && forward/backward search points overlap
         if odd && bmin <= d && d <= bmax && bd[sh + d] <= fd[sh + d] {
           forward_result = Some({
             xmid: x_cur,
             ymid: y_cur,
-            lo_minimal: true,
-            hi_minimal: true,
+            lo_minimal: true, // forward path is optimal
+            hi_minimal: true, // backward path is also optimal
           })
-          break
+          break // found meeting point, exit early
         }
-        d -= 2
+        d -= 2 // Myers algorithm characteristic: only check diagonals with same parity
       }
+
+      // If forward search found solution, return directly
       match forward_result {
         Some(result) => break result
         None => ()
       }
 
-      // Similarly extend the backward search
+      // Similarly extend diagonal range for backward search
       let bmin = if bmin > dmin {
-        bd[sh + bmin - 2] = @int.max_value
+        bd[sh + bmin - 2] = @int.max_value // mark unused diagonal as max value
         bmin - 1
       } else {
         bmin + 1
       }
       let bmax = if bmax < dmax {
-        bd[sh + bmax + 2] = @int.max_value
+        bd[sh + bmax + 2] = @int.max_value // mark unused diagonal as max value
         bmax + 1
       } else {
         bmax - 1
       }
 
-      // Process backward diagonals - check for early return
+      // Process all diagonals for backward search
       let mut backward_result : Partition? = None
       let mut d = bmax
       while d >= bmin {
+        // Get nearest reachable points on adjacent diagonals (backward search in reverse direction)
         let tlo = bd[sh + d - 1]
         let thi = bd[sh + d + 1]
+
+        // Backward search selection strategy: choose point with smaller x coordinate (closer to start)
         let x = if tlo < thi { tlo } else { thi - 1 }
 
-        // Find matching sequences backwards
+        // Search backward for matching sequence (reverse Snake)
         let mut x_cur = x
         let mut y_cur = x_cur - d
         while x_cur > xoff &&
@@ -142,7 +180,11 @@ fn[T] diag(
           x_cur -= 1
           y_cur -= 1
         }
+
+        // Update nearest reachable point on current diagonal
         bd[sh + d] = x_cur
+
+        // Check if meeting with forward search (meeting condition for even case)
         if not(odd) && fmin <= d && d <= fmax && bd[sh + d] <= fd[sh + d] {
           backward_result = Some({
             xmid: x_cur,
@@ -154,19 +196,23 @@ fn[T] diag(
         }
         d -= 2
       }
+
+      // If backward search found solution, return directly
       match backward_result {
         Some(result) => break result
         None => ()
       }
 
-      // Heuristic: if we've gone well beyond the call of duty, give up and report halfway between our best results so far.
+      // Heuristic handling: if computation cost too high, abandon finding optimal solution
+      // This is important mechanism for Myers algorithm to handle difficult cases
       if not(find_minimal) && c >= too_expensive {
-        // Find forward diagonal that maximizes x + y
+        // Find diagonal in forward search that maximizes x + y
+        // This indicates processing maximum number of elements overall
         let mut fxybest = -1
         let mut fxbest = fmax
         let mut d = fmax
         while d >= fmin {
-          let x = xlim.min(fd[sh + d])
+          let x = xlim.min(fd[sh + d]) // limit to valid range
           let y = x - d
           let (x, y) = if ylim < y { (ylim + d, ylim) } else { (x, y) }
           if fxybest < x + y {
@@ -176,12 +222,13 @@ fn[T] diag(
           d -= 2
         }
 
-        // Find backward diagonal that minimizes x + y
+        // Find diagonal in backward search that minimizes x + y
+        // This indicates reasonable partition point closest to start
         let mut bxybest = @int.max_value
         let mut bxbest = bmax
         let mut d = bmax
         while d >= bmin {
-          let x = xoff.max(bd[sh + d])
+          let x = xoff.max(bd[sh + d]) // limit to valid range
           let y = x - d
           let (x, y) = if y < yoff { (yoff + d, yoff) } else { (x, y) }
           if x + y < bxybest {
@@ -190,22 +237,26 @@ fn[T] diag(
           }
           d -= 2
         }
+
+        // Choose better heuristic partition point
+        // Compare "quality" of forward and backward, choose side that processes more elements
         if xlim + ylim - bxybest < fxybest - (xoff + yoff) {
           break {
             xmid: fxbest,
             ymid: fxybest - fxbest,
             lo_minimal: true,
-            hi_minimal: false,
+            hi_minimal: false, // right half is not optimal
           }
         } else {
           break {
             xmid: bxbest,
             ymid: bxybest - bxbest,
-            lo_minimal: false,
+            lo_minimal: false, // left half is not optimal
             hi_minimal: true,
           }
         }
       } else {
+        // Continue next round of search, edit distance increases by 1
         continue (c + 1, fmin, fmax, bmin, bmax)
       }
     }
@@ -215,20 +266,26 @@ fn[T] diag(
 ///|
 /// Main diff loop that computes the differences between two arrays
 fn[T] diff_loop(
-  cutoff : Int?,
-  a : Array[T],
-  ai : Array[Int],
-  b : Array[T],
-  bi : Array[Int],
-  n : Int,
-  m : Int,
+  cutoff : Int?, // computation cost threshold
+  a : Array[T], // original array A
+  ai : Array[Int], // indices of A elements that exist in B
+  b : Array[T], // original array B  
+  bi : Array[Int], // indices of B elements that exist in A
+  n : Int, // number of valid indices (A)
+  m : Int, // number of valid indices (B)
 ) -> (Array[Bool], Array[Bool]) {
-  let fd = Array::make(n + m + 3, 0)
-  let bd = Array::make(n + m + 3, 0)
-  let sh = m + 1
+  // Allocate working arrays for Myers algorithm
+  // Array size is n+m+3, sufficient to contain all possible diagonals
+  let fd = Array::make(n + m + 3, 0) // forward search array
+  let bd = Array::make(n + m + 3, 0) // backward search array
+  let sh = m + 1 // index offset, supporting negative diagonals
+
+  // Determine computation cost threshold
   let too_expensive = match cutoff {
     Some(c) => c
     None => {
+      // Default strategy: calculate reasonable threshold based on problem size
+      // Use bit operations to quickly compute approximate square root
       let diags = n + m + 3
       let mut result = 1
       let mut diags_cur = diags
@@ -236,27 +293,39 @@ fn[T] diff_loop(
         diags_cur = diags_cur >> 2
         result = result << 1
       }
-      result.max(4096)
+      result.max(4096) // at least 4096, ensuring reasonable performance
     }
   }
-  let xvec = fn(i) { a[ai[i]] }
-  let yvec = fn(j) { b[bi[j]] }
-  let chng1 = Array::make(a.length(), true)
-  let chng2 = Array::make(b.length(), true)
+
+  // Create element access functions - supporting indirect access
+  // This allows algorithm to process only elements that exist in both arrays
+  let xvec = fn(i) { a[ai[i]] } // access A elements through index array
+  let yvec = fn(j) { b[bi[j]] } // access B elements through index array
+
+  // Initialize change marker arrays
+  // true indicates element is deleted/inserted, false indicates element unchanged
+  let chng1 = Array::make(a.length(), true) // change markers for A
+  let chng2 = Array::make(b.length(), true) // change markers for B
+
+  // Preset common elements as unchanged
   for i = 0; i < n; i = i + 1 {
-    chng1[ai[i]] = false
+    chng1[ai[i]] = false // A elements that also exist in B marked as unchanged
   }
   for j = 0; j < m; j = j + 1 {
-    chng2[bi[j]] = false
+    chng2[bi[j]] = false // B elements that also exist in A marked as unchanged  
   }
+
+  // Recursive function: implement divide-and-conquer strategy
+  // Recursively apply Myers algorithm to each subregion
   fn loop_recursive(
-    xoff : Int,
-    xlim : Int,
-    yoff : Int,
-    ylim : Int,
-    find_minimal : Bool,
+    xoff : Int, // starting position of current A processing
+    xlim : Int, // ending position of current A processing  
+    yoff : Int, // starting position of current B processing
+    ylim : Int, // ending position of current B processing
+    find_minimal : Bool, // whether optimal solution needs to be found
   ) -> Unit {
-    // Skip matching prefix
+    // Optimization: skip matching prefix
+    // This is important optimization of Myers algorithm, reducing data to process
     let mut xoff = xoff
     let mut yoff = yoff
     while xoff < xlim && yoff < ylim && physical_equal(xvec(xoff), yvec(yoff)) {
@@ -264,7 +333,7 @@ fn[T] diff_loop(
       yoff += 1
     }
 
-    // Skip matching suffix
+    // Optimization: skip matching suffix  
     let mut xlim = xlim
     let mut ylim = ylim
     while xlim > xoff &&
@@ -273,18 +342,20 @@ fn[T] diff_loop(
       xlim -= 1
       ylim -= 1
     }
+
+    // Handle boundary cases
     if xoff == xlim {
-      // Only insertions
+      // Only insertions: A part exhausted, remaining B part all insertions
       for y = yoff; y < ylim; y = y + 1 {
         chng2[bi[y]] = true
       }
     } else if yoff == ylim {
-      // Only deletions
+      // Only deletions: B part exhausted, remaining A part all deletions
       for x = xoff; x < xlim; x = x + 1 {
         chng1[ai[x]] = true
       }
     } else {
-      // Find partition and recurse
+      // General case: need to find partition point and recursively process
       let partition = diag(
         fd~,
         bd~,
@@ -298,6 +369,8 @@ fn[T] diff_loop(
         too_expensive~,
         find_minimal~,
       )
+
+      // Recursively process left half (before partition point)
       loop_recursive(
         xoff,
         partition.xmid,
@@ -305,6 +378,8 @@ fn[T] diff_loop(
         partition.ymid,
         partition.lo_minimal,
       )
+
+      // Recursively process right half (after partition point)
       loop_recursive(
         partition.xmid,
         xlim,
@@ -315,6 +390,7 @@ fn[T] diff_loop(
     }
   }
 
+  // Start recursively processing entire region
   loop_recursive(0, n, 0, m, false)
   (chng1, chng2)
 }
@@ -329,31 +405,30 @@ fn[T] diff_loop(
 /// instead of `==`, which can improve speed much.
 fn[T : Eq + Hash] make_indexer(a : Array[T], b : Array[T]) -> Array[Int] {
   let n = a.length()
-  let htb : Map[T, T] = Map::new()
+  let htb : Map[T, T] = Map::new() // hash table for element deduplication and unification
 
-  // Update b array and populate hash table
+  // Step 1: process array b, establish mapping from elements to unique objects
+  // This ensures same elements have only one copy in memory
   for i = 0; i < b.length(); i = i + 1 {
     match htb.get(b[i]) {
-      Some(v) => b[i] = v
-      None => htb[b[i]] = b[i]
+      Some(v) => b[i] = v // already exists, use unified object reference
+      None => htb[b[i]] = b[i] // new element, add to mapping
     }
   }
-  let ai = Array::make(n, 0)
-  let mut k = 0
+  let ai = Array::make(n, 0) // temporary storage for valid indices
+  let mut k = 0 // valid element count
 
-  // Find matching elements in a
+  // Step 2: process array a, find elements that also exist in b
   for i = 0; i < n; i = i + 1 {
     match htb.get(a[i]) {
       Some(v) => {
-        a[i] = v
-        ai[k] = i
+        a[i] = v // unify object reference, enabling subsequent comparison with physical_equal
+        ai[k] = i // record original index of this element
         k += 1
       }
-      None => ()
+      None => () // doesn't exist in b, skip
     }
   }
-
-  // Return subarray with only valid indices
   let result = Array::make(k, 0)
   for i = 0; i < k; i = i + 1 {
     result[i] = ai[i]
@@ -368,10 +443,13 @@ fn[T : Eq + Hash] diff(
   a : Array[T],
   b : Array[T],
 ) -> (Array[Bool], Array[Bool]) {
-  let ai = make_indexer(a, b)
-  let bi = make_indexer(b, a)
-  let n = ai.length()
-  let m = bi.length()
+  // Generate indexers: find elements that also exist in other array
+  let ai = make_indexer(a, b) // indices of a elements that exist in b
+  let bi = make_indexer(b, a) // indices of b elements that exist in a
+  let n = ai.length() // number of valid elements (a)
+  let m = bi.length() // number of valid elements (b)
+
+  // Call main loop for difference computation
   diff_loop(cutoff, a, ai, b, bi, n, m)
 }
 
@@ -385,28 +463,34 @@ fn[T : Eq + Hash] diff(
 /// `cutoff` is exceeded, `iter_matches` returns a correct, but not necessarily minimal
 /// diff. It defaults to about `sqrt(a.length() + b.length())`.
 pub fn[T : Eq + Hash] iter_matches(
-  cutoff? : Int,
-  f : (Int, Int) -> Unit,
-  old~ : Array[T],
-  new~ : Array[T],
-) -> Unit {
+  cutoff? : Int, // optional computation cost limit
+  old~ : Array[T], // original array
+  new~ : Array[T], // new array
+) -> Iter2[Int, Int] {
+  // First compute difference markers
   let (d1, d2) = diff(cutoff, old, new)
-  fn aux(i1 : Int, i2 : Int) -> Unit {
-    if i1 >= d1.length() || i2 >= d2.length() {
-      ()
-    } else if not(d1[i1]) {
-      if not(d2[i2]) {
-        f(i1, i2)
-        aux(i1 + 1, i2 + 1)
+  Iter2::new(fn(yield_) {
+    // traverse two arrays, find unchanged element pairs
+    for i1 = 0, i2 = 0 {
+      if i1 >= d1.length() || i2 >= d2.length() {
+        return IterEnd // reached end of arrays
+      } else if not(d1[i1]) {
+        // old[i1] unchanged
+        if not(d2[i2]) {
+          // new[i2] also unchanged - found matching pair
+          guard yield_(i1, i2) is IterContinue else { return IterEnd }
+          continue i1 + 1, i2 + 1 // advance both
+        } else {
+          // new[i2] changed (insertion) - skip element in new
+          continue i1, i2 + 1
+        }
+      } else if not(d2[i2]) {
+        // old[i1] changed but new[i2] didn't (deletion) - skip element in old  
+        continue i1 + 1, i2
       } else {
-        aux(i1, i2 + 1)
+        // both elements changed - advance both to find next possible match
+        continue i1 + 1, i2 + 1
       }
-    } else if not(d2[i2]) {
-      aux(i1 + 1, i2)
-    } else {
-      aux(i1 + 1, i2 + 1)
     }
-  }
-
-  aux(0, 0)
+  })
 }
