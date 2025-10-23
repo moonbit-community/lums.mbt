@@ -1,3 +1,3 @@
 # Piediff
 
-Piediff is an MoonBit implementation of Bram Cohen's patience diff algorithm (also provides a basic Myers diff implementation).
+Piediff is a MoonBit implementation of Bram Cohen's patience diff algorithm (also provides a basic Myers diff).
