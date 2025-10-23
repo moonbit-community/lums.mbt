@@ -1,5 +1,5 @@
 ///|
-test {
+test "insert/delete in middle" {
   let old =
     #|fn main() {
     #|  println("foo")
@@ -156,6 +156,33 @@ test "no trailing newline behavior" {
     line_diff(old~, new~),
     content=(
       #|  last
+      #|
+    ),
+  )
+}
+
+///|
+test "multiple insert/delete" {
+  let old =
+    #|carrot
+    #|tomato
+    #|potato
+    #|cabbage
+  let new =
+    #|apple
+    #|banana
+    #|tomato
+    #|pineapple
+  inspect(
+    line_diff(old~, new~),
+    content=(
+      #|- carrot
+      #|+ apple
+      #|+ banana
+      #|  tomato
+      #|- potato
+      #|- cabbage
+      #|+ pineapple
       #|
     ),
   )
