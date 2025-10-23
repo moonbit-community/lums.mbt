@@ -11,10 +11,10 @@ test "insert/delete in middle" {
   inspect(
     line_diff(old~, new~),
     content=(
-      #|  fn main() {
-      #|-   println("foo")
-      #|+   println("bar")
-      #|  }
+      #|   fn main() {
+      #| -   println("foo")
+      #| +   println("bar")
+      #|   }
       #|
     ),
   )
@@ -30,9 +30,9 @@ test "identical inputs" {
   inspect(
     line_diff(old~, new~),
     content=(
-      #|  a
-      #|  b
-      #|  c
+      #|   a
+      #|   b
+      #|   c
       #|
     ),
   )
@@ -50,9 +50,9 @@ test "insert at beginning" {
   inspect(
     line_diff(old~, new~),
     content=(
-      #|+ a
-      #|  b
-      #|  c
+      #| + a
+      #|   b
+      #|   c
       #|
     ),
   )
@@ -70,9 +70,9 @@ test "insert at end" {
   inspect(
     line_diff(old~, new~),
     content=(
-      #|  a
-      #|  b
-      #|+ c
+      #|   a
+      #|   b
+      #| + c
       #|
     ),
   )
@@ -90,9 +90,9 @@ test "delete at beginning" {
   inspect(
     line_diff(old~, new~),
     content=(
-      #|- a
-      #|  b
-      #|  c
+      #| - a
+      #|   b
+      #|   c
       #|
     ),
   )
@@ -110,9 +110,9 @@ test "delete at end" {
   inspect(
     line_diff(old~, new~),
     content=(
-      #|  a
-      #|  b
-      #|- c
+      #|   a
+      #|   b
+      #| - c
       #|
     ),
   )
@@ -133,12 +133,12 @@ test "blank lines and unicode" {
   inspect(
     line_diff(old~, new~),
     content=(
-      #|  
-      #|  你
-      #|- 
-      #|- 好
-      #|+ 世
-      #|+ 界
+      #|   
+      #|   你
+      #| - 
+      #| - 好
+      #| + 世
+      #| + 界
       #|
     ),
   )
@@ -155,7 +155,7 @@ test "no trailing newline behavior" {
   inspect(
     line_diff(old~, new~),
     content=(
-      #|  last
+      #|   last
       #|
     ),
   )
@@ -176,13 +176,26 @@ test "multiple insert/delete" {
   inspect(
     line_diff(old~, new~),
     content=(
-      #|- carrot
-      #|+ apple
-      #|+ banana
-      #|  tomato
-      #|- potato
-      #|- cabbage
-      #|+ pineapple
+      #| - carrot
+      #| + apple
+      #| + banana
+      #|   tomato
+      #| - potato
+      #| - cabbage
+      #| + pineapple
+      #|
+    ),
+  )
+  inspect(
+    line_diff(old~, new~, output_line_number=true),
+    content=(
+      #|1     - carrot
+      #|   1  + apple
+      #|   2  + banana
+      #|2  3    tomato
+      #|3     - potato
+      #|4     - cabbage
+      #|   4  + pineapple
       #|
     ),
   )
