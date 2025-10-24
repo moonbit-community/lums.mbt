@@ -49,8 +49,8 @@ priv struct Partition {
 /// - find_minimal~: whether to force finding minimal edit script (regardless of computation cost)
 /// 
 fn[T] diag(
-  fd~ : Array[Int], // forward search diagonal array - stores farthest reachable point on each diagonal
-  bd~ : Array[Int], // backward search diagonal array - stores nearest reachable point on each diagonal
+  fd~ : FixedArray[Int], // forward search diagonal array - stores farthest reachable point on each diagonal
+  bd~ : FixedArray[Int], // backward search diagonal array - stores nearest reachable point on each diagonal
   sh~ : Int, // array index offset - enables arrays to support negative indices
   xv~ : (Int) -> T, // access function for sequence A - supports indirect access and index remapping
   yv~ : (Int) -> T, // access function for sequence B - supports indirect access and index remapping
@@ -276,8 +276,8 @@ fn[T] diff_loop(
 ) -> (Array[Bool], Array[Bool]) {
   // Allocate working arrays for Myers algorithm
   // Array size is n+m+3, sufficient to contain all possible diagonals
-  let fd = Array::make(n + m + 3, 0) // forward search array
-  let bd = Array::make(n + m + 3, 0) // backward search array
+  let fd = FixedArray::make(n + m + 3, 0) // forward search array
+  let bd = FixedArray::make(n + m + 3, 0) // backward search array
   let sh = m + 1 // index offset, supporting negative diagonals
 
   // Determine computation cost threshold
