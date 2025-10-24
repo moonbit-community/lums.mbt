@@ -267,9 +267,9 @@ fn[T] diag(
 /// Main diff loop that computes the differences between two arrays
 fn[T] diff_loop(
   cutoff : Int?, // computation cost threshold
-  a : Array[T], // original array A
+  a : MutArrayView[T], // original array A
   ai : Array[Int], // indices of A elements that exist in B
-  b : Array[T], // original array B  
+  b : MutArrayView[T], // original array B  
   bi : Array[Int], // indices of B elements that exist in A
   n : Int, // number of valid indices (A)
   m : Int, // number of valid indices (B)
@@ -403,7 +403,10 @@ fn[T] diff_loop(
 /// 
 /// All item comparisons in the main algorithm can therefore be done with `physical_equal` 
 /// instead of `==`, which can improve speed much.
-fn[T : Eq + Hash] make_indexer(a : Array[T], b : Array[T]) -> Array[Int] {
+fn[T : Eq + Hash] make_indexer(
+  a : MutArrayView[T],
+  b : MutArrayView[T],
+) -> Array[Int] {
   let n = a.length()
   let htb : Map[T, T] = Map::new() // hash table for element deduplication and unification
 
@@ -440,8 +443,8 @@ fn[T : Eq + Hash] make_indexer(a : Array[T], b : Array[T]) -> Array[Int] {
 /// Main function that computes diff between two arrays
 fn[T : Eq + Hash] diff(
   cutoff : Int?,
-  a : Array[T],
-  b : Array[T],
+  a : MutArrayView[T],
+  b : MutArrayView[T],
 ) -> (Array[Bool], Array[Bool]) {
   // Generate indexers: find elements that also exist in other array
   let ai = make_indexer(a, b) // indices of a elements that exist in b
@@ -463,10 +466,18 @@ fn[T : Eq + Hash] diff(
 pub fn[T : Eq + Hash] iter_matches(
   cutoff? : Int, // optional computation cost limit
   old~ : Array[T], // original array
+  old_start? : Int = 0,
+  old_end? : Int = old.length(),
   new~ : Array[T], // new array
+  new_start? : Int = 0,
+  new_end? : Int = new.length(),
 ) -> Iter2[Int, Int] {
   // First compute difference markers
-  let (d1, d2) = diff(cutoff, old, new)
+  let (d1, d2) = diff(
+    cutoff,
+    old.mut_view(start=old_start, end=old_end),
+    new.mut_view(start=new_start, end=new_end),
+  )
   Iter2::new(fn(yield_) {
     // traverse two arrays, find unchanged element pairs
     for i1 = 0, i2 = 0 {
@@ -476,7 +487,9 @@ pub fn[T : Eq + Hash] iter_matches(
         // old[i1] unchanged
         if not(d2[i2]) {
           // new[i2] also unchanged - found matching pair
-          guard yield_(i1, i2) is IterContinue else { return IterEnd }
+          guard yield_(i1 + old_start, i2 + new_start) is IterContinue else {
+            return IterEnd
+          }
           continue i1 + 1, i2 + 1 // advance both
         } else {
           // new[i2] changed (insertion) - skip element in new

@@ -2,10 +2,14 @@
 fn print_edits(
   cutoff? : Int,
   old : Array[String],
+  old_start? : Int = 0,
+  old_end? : Int = old.length(),
   new : Array[String],
+  new_start? : Int = 0,
+  new_end? : Int = new.length(),
 ) -> String {
-  let mut prev_old_idx = 0
-  let mut prev_new_idx = 0
+  let mut prev_old_idx = old_start
+  let mut prev_new_idx = new_start
   let result = Array::new(capacity=old.length() + new.length())
   let callback = fn(old_idx, new_idx) {
     for i in prev_old_idx..<old_idx {
@@ -20,18 +24,35 @@ fn print_edits(
   }
   match cutoff {
     Some(cutoff) =>
-      for old_idx, new_idx in @plain_diff.iter_matches(cutoff~, old~, new~) {
+      for
+        old_idx, new_idx in @plain_diff.iter_matches(
+          cutoff~,
+          old~,
+          old_start~,
+          old_end~,
+          new~,
+          new_start~,
+          new_end~,
+        ) {
         callback(old_idx, new_idx)
       }
     None =>
-      for old_idx, new_idx in @plain_diff.iter_matches(old~, new~) {
+      for
+        old_idx, new_idx in @plain_diff.iter_matches(
+          old~,
+          old_start~,
+          old_end~,
+          new~,
+          new_start~,
+          new_end~,
+        ) {
         callback(old_idx, new_idx)
       }
   }
-  for i in prev_old_idx..<old.length() {
+  for i in prev_old_idx..<old_end {
     result.push("-  " + old[i])
   }
-  for i in prev_new_idx..<new.length() {
+  for i in prev_new_idx..<new_end {
     result.push("+  " + new[i])
   }
   return result.join("\n")
@@ -532,4 +553,38 @@ test "diff symmetry test" {
 
   // Both directions should have the same number of matches
   assert_eq(matches1.length(), matches2.length())
+}
+
+///|
+test "diff sub array" {
+  let old = [
+    "Apple", "Banana", "Orange", "Grape", "Strawberry", "Watermelon", "Peach", "Pear",
+    "Pineapple", "Cherry",
+  ]
+  let new = [
+    "Apple", "Banana", "Orange", "Grape", "Strawberry", "Watermelon", "Peach", "Pear",
+    "Pineapple", "Cherry",
+  ]
+  assert_eq(old, new)
+  inspect(
+    print_edits(old, new, old_end=4, new_end=5),
+    content=(
+      #|   Apple
+      #|   Banana
+      #|   Orange
+      #|   Grape
+      #|+  Strawberry
+    ),
+  )
+  inspect(
+    print_edits(old, new, old_start=4, new_start=5),
+    content=(
+      #|-  Strawberry
+      #|   Watermelon
+      #|   Peach
+      #|   Pear
+      #|   Pineapple
+      #|   Cherry
+    ),
+  )
 }

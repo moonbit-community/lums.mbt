@@ -2,7 +2,7 @@
 package "myfreess/piediff/plain_diff"
 
 // Values
-fn[T : Eq + Hash] iter_matches(cutoff? : Int, old~ : Array[T], new~ : Array[T]) -> Iter2[Int, Int]
+fn[T : Eq + Hash] iter_matches(cutoff? : Int, old~ : Array[T], old_start? : Int, old_end? : Int, new~ : Array[T], new_start? : Int, new_end? : Int) -> Iter2[Int, Int]
 
 // Errors
 
