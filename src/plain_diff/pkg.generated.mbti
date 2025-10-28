@@ -2,11 +2,36 @@
 package "myfreess/piediff/plain_diff"
 
 // Values
-fn[T : Eq + Hash] iter_matches(cutoff? : Int, old~ : Array[T], old_start? : Int, old_end? : Int, new~ : Array[T], new_start? : Int, new_end? : Int) -> Iter2[Int, Int]
+fn group_edits(Array[Edit], radius? : Int) -> Array[Array[Edit]]
+
+fn[T : Hash + Eq] plain_diff(old~ : Array[T], new~ : Array[T], cutoff? : Int, old_start? : Int, old_end? : Int, new_start? : Int, new_end? : Int) -> Array[Edit]
 
 // Errors
 
 // Types and methods
+pub enum Edit {
+  Delete(old_index~ : Int, new_index~ : Int, old_len~ : Int)
+  Insert(old_index~ : Int, new_index~ : Int, new_len~ : Int)
+  Equal(mut old_index~ : Int, mut new_index~ : Int, mut len~ : Int)
+}
+fn Edit::output(Self, &Logger) -> Unit // from trait `Show`
+fn Edit::to_json(Self) -> Json // from trait `ToJson`
+fn Edit::to_string(Self) -> String // from trait `Show`
+impl Show for Edit
+impl ToJson for Edit
+
+pub struct HunkHeader(Range, Range)
+
+fn HunkHeader::new(Array[Edit]) -> Self
+fn HunkHeader::output(Self, &Logger) -> Unit // from trait `Show`
+fn HunkHeader::to_string(Self) -> String // from trait `Show`
+impl Show for HunkHeader
+
+pub struct Range(Int, Int)
+
+fn Range::output(Self, &Logger) -> Unit // from trait `Show`
+fn Range::to_string(Self) -> String // from trait `Show`
+impl Show for Range
 
 // Type aliases
 
