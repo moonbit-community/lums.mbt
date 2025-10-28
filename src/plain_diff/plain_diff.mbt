@@ -463,14 +463,14 @@ fn[T : Eq + Hash] diff(
 /// The `cutoff` is an upper bound on the minimum edit distance between `old~` and `new~`. When
 /// `cutoff` is exceeded, `iter_matches` returns a correct, but not necessarily minimal
 /// diff. It defaults to about `sqrt(a.length() + b.length())`.
-pub fn[T : Eq + Hash] iter_matches(
-  cutoff? : Int, // optional computation cost limit
+fn[T : Eq + Hash] iter_matches(
+  cutoff~ : Int?, // optional computation cost limit
   old~ : Array[T], // original array
-  old_start? : Int = 0,
-  old_end? : Int = old.length(),
+  old_start~ : Int,
+  old_end~ : Int,
   new~ : Array[T], // new array
-  new_start? : Int = 0,
-  new_end? : Int = new.length(),
+  new_start~ : Int,
+  new_end~ : Int,
 ) -> Iter2[Int, Int] {
   // First compute difference markers
   let (d1, d2) = diff(
@@ -504,4 +504,119 @@ pub fn[T : Eq + Hash] iter_matches(
       }
     }
   })
+}
+
+///|
+pub fn[T : Hash + Eq] plain_diff(
+  old~ : Array[T],
+  new~ : Array[T],
+  cutoff? : Int,
+  old_start? : Int = 0,
+  old_end? : Int = old.length(),
+  new_start? : Int = 0,
+  new_end? : Int = new.length(),
+) -> Array[Edit] {
+  let result = Array::new(capacity=old.length() + new.length())
+  let mut prev_old_idx = 0
+  let mut prev_new_idx = 0
+  let mut equal_old_idx = 0
+  let mut equal_new_idx = 0
+  let mut consecutive_equal_length = 0
+  for
+    old_idx, new_idx in iter_matches(
+      old~,
+      new~,
+      cutoff~,
+      old_start~,
+      old_end~,
+      new_start~,
+      new_end~,
+    ) {
+    // emit delete
+    if prev_old_idx != old_idx {
+      if consecutive_equal_length != 0 {
+        result.push(
+          Equal(
+            old_index=equal_old_idx,
+            new_index=equal_new_idx,
+            len=consecutive_equal_length,
+          ),
+        )
+      }
+      consecutive_equal_length = 0
+      result.push(
+        Delete(
+          old_index=prev_old_idx,
+          new_index=prev_new_idx,
+          old_len=old_idx - prev_old_idx,
+        ),
+      )
+    }
+    // emit insert
+    if prev_new_idx != new_idx {
+      if consecutive_equal_length != 0 {
+        result.push(
+          Equal(
+            old_index=equal_old_idx,
+            new_index=equal_new_idx,
+            len=consecutive_equal_length,
+          ),
+        )
+      }
+      consecutive_equal_length = 0
+      result.push(
+        Insert(
+          old_index=prev_old_idx,
+          new_index=prev_new_idx,
+          new_len=new_idx - prev_new_idx,
+        ),
+      )
+    }
+    prev_old_idx = old_idx + 1
+    prev_new_idx = new_idx + 1
+    // emit equal
+    if consecutive_equal_length == 0 {
+      equal_old_idx = old_idx
+      equal_new_idx = new_idx
+      consecutive_equal_length = 1
+    } else {
+      consecutive_equal_length += 1
+    }
+  } else {
+    // emit remain equal
+    if consecutive_equal_length != 0 {
+      result.push(
+        Equal(
+          old_index=equal_old_idx,
+          new_index=equal_new_idx,
+          len=consecutive_equal_length,
+        ),
+      )
+    }
+    // emit remaining deletions
+    if prev_old_idx != old.length() {
+      result.push(
+        Delete(
+          old_index=prev_old_idx,
+          new_index=prev_new_idx,
+          old_len=old.length() - prev_old_idx,
+        ),
+      )
+      // update prev_old_idx
+      prev_old_idx = old.length()
+    }
+
+    // emit remaining insertions
+
+    if prev_new_idx != new.length() {
+      result.push(
+        Insert(
+          old_index=prev_old_idx,
+          new_index=prev_new_idx,
+          new_len=new.length() - prev_new_idx,
+        ),
+      )
+    }
+    return result
+  }
 }

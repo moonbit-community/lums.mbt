@@ -2,7 +2,7 @@
 package "myfreess/piediff/line_diff"
 
 // Values
-fn line_diff(old~ : StringView, new~ : StringView, output_line_number? : Bool) -> String
+fn line_diff(old~ : StringView, new~ : StringView) -> String
 
 // Errors
 
