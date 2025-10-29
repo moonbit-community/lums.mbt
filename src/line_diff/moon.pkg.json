@@ -1,6 +1,5 @@
 {
     "import": [
       "myfreess/piediff/plain_diff"
-    ],
-    "warn-list": "-1"
+    ]
 }
