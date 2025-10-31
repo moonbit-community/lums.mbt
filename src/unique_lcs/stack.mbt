@@ -5,7 +5,7 @@ priv struct Stack[T] {
 }
 
 ///|
-fn[T] push(self : Stack[T], t : T) -> Unit {
+fn[T] Stack::push(self : Stack[T], t : T) -> Unit {
   self.stack = self.stack.add(self.top)
   self.top = t
 }

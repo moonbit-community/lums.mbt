@@ -5,7 +5,7 @@ priv struct BackPointer[T] {
 }
 
 ///|
-fn[T] to_array(self : BackPointer[T]) -> Array[T] {
+fn[T] BackPointer::to_array(self : BackPointer[T]) -> Array[T] {
   match self.prev {
     None => [self.value]
     Some(prev) => {
