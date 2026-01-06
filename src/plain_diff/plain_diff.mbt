@@ -467,32 +467,36 @@ fn[T : Eq + Hash] iter_matches(
   cutoff~ : Int?, // optional computation cost limit
   old~ : @builtin.MutArrayView[T], // original array
   new~ : @builtin.MutArrayView[T], // new array
-) -> Iter2[Int, Int] {
+) -> Iterator2[Int, Int] {
   // First compute difference markers
   let (d1, d2) = diff(cutoff, old, new)
-  Iter2::new(fn(yield_) {
+  let mut i1 = 0
+  let mut i2 = 0
+  Iterator2::new(fn() {
     // traverse two arrays, find unchanged element pairs
-    for i1 = 0, i2 = 0 {
-      if i1 >= d1.length() || i2 >= d2.length() {
-        return IterEnd // reached end of arrays
-      } else if not(d1[i1]) {
+    while i1 < d1.length() && i2 < d2.length() {
+      if not(d1[i1]) {
         // old[i1] unchanged
         if not(d2[i2]) {
           // new[i2] also unchanged - found matching pair
-          guard yield_(i1, i2) is IterContinue else { return IterEnd }
-          continue i1 + 1, i2 + 1 // advance both
+          let result = (i1, i2)
+          i1 += 1
+          i2 += 1
+          return Some(result)
         } else {
           // new[i2] changed (insertion) - skip element in new
-          continue i1, i2 + 1
+          i2 += 1
         }
       } else if not(d2[i2]) {
-        // old[i1] changed but new[i2] didn't (deletion) - skip element in old  
-        continue i1 + 1, i2
+        // old[i1] changed but new[i2] didn't (deletion) - skip element in old
+        i1 += 1
       } else {
         // both elements changed - advance both to find next possible match
-        continue i1 + 1, i2 + 1
+        i1 += 1
+        i2 += 1
       }
     }
+    None
   })
 }
 
