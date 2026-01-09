@@ -1,0 +1,5 @@
+import { "moonbit-community/piediff/edit" }
+
+options(
+  targets: { "indexer_wbtest.mbt": [ "not", "js" ] },
+)

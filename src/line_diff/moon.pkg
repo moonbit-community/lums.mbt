@@ -1,0 +1,5 @@
+import {
+  "moonbit-community/piediff/plain_diff",
+  "moonbit-community/piediff/edit",
+  "moonbit-community/piediff/patience",
+}

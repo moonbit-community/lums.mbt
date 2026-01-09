@@ -470,30 +470,38 @@ fn[T : Eq + Hash] iter_matches(
 ) -> Iter2[Int, Int] {
   // First compute difference markers
   let (d1, d2) = diff(cutoff, old, new)
-  Iter2::new(fn(yield_) {
+  let mut i1 = 0
+  let mut i2 = 0
+  fn go() {
     // traverse two arrays, find unchanged element pairs
-    for i1 = 0, i2 = 0 {
-      if i1 >= d1.length() || i2 >= d2.length() {
-        return IterEnd // reached end of arrays
-      } else if not(d1[i1]) {
-        // old[i1] unchanged
-        if not(d2[i2]) {
-          // new[i2] also unchanged - found matching pair
-          guard yield_(i1, i2) is IterContinue else { return IterEnd }
-          continue i1 + 1, i2 + 1 // advance both
-        } else {
-          // new[i2] changed (insertion) - skip element in new
-          continue i1, i2 + 1
-        }
-      } else if not(d2[i2]) {
-        // old[i1] changed but new[i2] didn't (deletion) - skip element in old  
-        continue i1 + 1, i2
+    if i1 >= d1.length() || i2 >= d2.length() {
+      return None // reached end of arrays
+    } else if not(d1[i1]) {
+      // old[i1] unchanged
+      if not(d2[i2]) {
+        // new[i2] also unchanged - found matching pair
+        let matching_pair = (i1, i2)
+        i1 += 1
+        i2 += 1
+        return Some(matching_pair)
       } else {
-        // both elements changed - advance both to find next possible match
-        continue i1 + 1, i2 + 1
+        // new[i2] changed (insertion) - skip element in new
+        i2 += 1
+        go()
       }
+    } else if not(d2[i2]) {
+      // old[i1] changed but new[i2] didn't (deletion) - skip element in old  
+      i1 += 1
+      go()
+    } else {
+      // both elements changed - skip both and find next possible match
+      i1 += 1
+      i2 += 1
+      go()
     }
-  })
+  }
+
+  Iter2::new(go)
 }
 
 ///|UUID(b4dbd667-86b3-40bb-80a9-de7f0e9dc7aa)
