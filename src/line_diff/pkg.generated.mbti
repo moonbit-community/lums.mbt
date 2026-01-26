@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "moonbit-community/piediff/line_diff"
 
-import(
-  "moonbit-community/piediff/edit"
-)
+import {
+  "moonbit-community/piediff/edit",
+}
 
 // Values
 pub fn line_diff(old~ : StringView, new~ : StringView, patience? : Bool) -> Array[(@edit.HunkHeader, Array[(@edit.EditTag, StringView)])]
