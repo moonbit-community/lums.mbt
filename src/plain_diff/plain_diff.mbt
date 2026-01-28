@@ -465,8 +465,8 @@ fn[T : Eq + Hash] diff(
 /// diff. It defaults to about `sqrt(a.length() + b.length())`.
 fn[T : Eq + Hash] iter_matches(
   cutoff~ : Int?, // optional computation cost limit
-  old~ : @builtin.MutArrayView[T], // original array
-  new~ : @builtin.MutArrayView[T], // new array
+  old~ : MutArrayView[T], // original array
+  new~ : MutArrayView[T], // new array
 ) -> Iter2[Int, Int] {
   // First compute difference markers
   let (d1, d2) = diff(cutoff, old, new)

@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "moonbit-community/piediff/patience"
 
-import(
-  "moonbit-community/piediff/edit"
-)
+import {
+  "moonbit-community/piediff/edit",
+}
 
 // Values
 pub fn[T : Eq + Hash] patience_diff(old~ : MutArrayView[T], new~ : MutArrayView[T], cutoff? : Int) -> Array[@edit.Edit]

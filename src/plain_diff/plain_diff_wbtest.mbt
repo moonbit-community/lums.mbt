@@ -1,8 +1,8 @@
 ///|UUID(aed6276f-dcf0-42b9-8607-fd5305ba7c93)
 fn print_edits(
   cutoff? : Int,
-  old : @builtin.MutArrayView[String],
-  new : @builtin.MutArrayView[String],
+  old : MutArrayView[String],
+  new : MutArrayView[String],
 ) -> String {
   let mut prev_old_idx = 0
   let mut prev_new_idx = 0

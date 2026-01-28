@@ -1,4 +1,8 @@
-import { "moonbit-community/piediff/edit" }
+import {
+  "moonbit-community/piediff/edit",
+  "moonbitlang/core/builtin",
+  "moonbitlang/core/int",
+}
 
 options(
   targets: { "indexer_wbtest.mbt": [ "not", "js" ] },

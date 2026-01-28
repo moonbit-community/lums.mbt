@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "moonbit-community/piediff/plain_diff"
 
-import(
-  "moonbit-community/piediff/edit"
-)
+import {
+  "moonbit-community/piediff/edit",
+}
 
 // Values
 pub fn[T : Hash + Eq] plain_diff(old~ : MutArrayView[T], new~ : MutArrayView[T], cutoff? : Int) -> Array[@edit.Edit]
