@@ -251,12 +251,12 @@ test "single element arrays" {
 
 ///|UUID(c01d74b9-9e44-4870-97e0-a433f7b178b2)
 test "long sequence LCS" {
-  let old = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].map(
-    String::make(3, _),
-  )
-  let new = ['a', 'x', 'c', 'y', 'e', 'z', 'g', 'w', 'i', 'v'].map(
-    String::make(3, _),
-  )
+  let old = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].map(x0 => String::make(
+    3, x0,
+  ))
+  let new = ['a', 'x', 'c', 'y', 'e', 'z', 'g', 'w', 'i', 'v'].map(x0 => String::make(
+    3, x0,
+  ))
   inspect(
     print_edits(old.mut_view(), new.mut_view()),
     content=(
