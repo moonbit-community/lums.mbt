@@ -73,3 +73,14 @@ test "large text to hunks" {
     ],
   ])
 }
+
+///|
+test "cutoff keeps insert between equal ranges" {
+  let old = [1, 2].mut_view()
+  let new = [1, 3, 2].mut_view()
+  json_inspect(plain_diff(old~, new~, cutoff=1), content=[
+    ["Equal", { "old_index": 0, "new_index": 0, "len": 1 }],
+    ["Insert", { "old_index": 1, "new_index": 1, "new_len": 1 }],
+    ["Equal", { "old_index": 1, "new_index": 2, "len": 1 }],
+  ])
+}
