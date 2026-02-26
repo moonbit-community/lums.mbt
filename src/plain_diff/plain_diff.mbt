@@ -567,7 +567,7 @@ pub fn[T : Hash + Eq] plain_diff(
     } else {
       consecutive_equal_length += 1
     }
-  } else {
+  } nobreak {
     // emit remain equal
     if consecutive_equal_length != 0 {
       result.push(

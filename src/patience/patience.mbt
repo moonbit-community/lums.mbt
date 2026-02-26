@@ -42,7 +42,7 @@ pub fn[T : Eq + Hash] patience_diff(
     }
     prev_old = barrier.0
     prev_new = barrier.1
-  } else {
+  } nobreak {
     let old = old.mut_view(start=prev_old, end=old.length())
     let new = new.mut_view(start=prev_new, end=new.length())
     let edits = match cutoff {
