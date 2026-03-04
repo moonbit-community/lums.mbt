@@ -1,4 +1,4 @@
-///|UUID(d3d590fc-6972-4d44-8680-15838508cd7e)
+///|
 fn[T : Eq + Hash] find_unique(
   old~ : ArrayView[T],
   new~ : ArrayView[T],

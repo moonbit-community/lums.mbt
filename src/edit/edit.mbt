@@ -1,18 +1,18 @@
-///|UUID(49fa581c-da0e-483c-ba9d-d36d55609d2f)
+///|
 pub(all) enum Edit {
   Delete(mut old_index~ : Int, mut new_index~ : Int, mut old_len~ : Int)
   Insert(mut old_index~ : Int, mut new_index~ : Int, mut new_len~ : Int)
   Equal(mut old_index~ : Int, mut new_index~ : Int, mut len~ : Int)
 } derive(Show, ToJson)
 
-///|UUID(80eeee4c-1824-4966-9957-16ccce2f9068)
+///|
 pub enum EditTag {
   Del
   Ins
   Eql
 }
 
-///|UUID(bd0f5214-af0d-4f87-9ee2-1baa257f3f61)
+///|
 pub fn Edit::tag(self : Edit) -> EditTag {
   match self {
     Insert(_) => Ins
@@ -21,7 +21,7 @@ pub fn Edit::tag(self : Edit) -> EditTag {
   }
 }
 
-///|UUID(2dbaaf6c-e610-496d-9a11-a2fabf4a4ce1)
+///|
 fn Edit::old_range(self : Edit) -> (Int, Int) {
   match self {
     Insert(old_index~, ..) => (old_index, old_index)
@@ -30,7 +30,7 @@ fn Edit::old_range(self : Edit) -> (Int, Int) {
   }
 }
 
-///|UUID(0c368a90-0e7e-4d4d-bb12-12845268e5a6)
+///|
 fn Edit::new_range(self : Edit) -> (Int, Int) {
   match self {
     Insert(new_index~, new_len~, ..) => (new_index, new_index + new_len)
@@ -39,7 +39,7 @@ fn Edit::new_range(self : Edit) -> (Int, Int) {
   }
 }
 
-///|UUID(10b54113-5a5c-4276-b21b-734cae9dd015)
+///|
 /// Isolate change clusters by eliminating ranges with no changes.
 ///
 /// This will leave holes behind in long periods of equal ranges so that
@@ -94,7 +94,7 @@ pub fn group_edits(
   return result
 }
 
-///|UUID(99d905e4-4d44-41ae-99b0-61e9d6332c18)
+///|
 fn Int::saturating_sub(self : Int, subtrahend : Int) -> Int {
   if self < subtrahend {
     0

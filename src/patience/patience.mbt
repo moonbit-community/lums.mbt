@@ -1,4 +1,4 @@
-///|UUID(f2773db5-ef3d-44d4-b084-48a5936899d0)
+///|
 pub fn[T : Eq + Hash] patience_diff(
   old~ : @builtin.MutArrayView[T],
   new~ : @builtin.MutArrayView[T],
@@ -71,7 +71,7 @@ pub fn[T : Eq + Hash] patience_diff(
   return result
 }
 
-///|UUID(5a0b4477-987c-4381-80d1-a923ba603229)
+///|
 fn Array::push_and_merge_consecutive_equal(
   self : Array[@edit.Edit],
   edit : @edit.Edit,

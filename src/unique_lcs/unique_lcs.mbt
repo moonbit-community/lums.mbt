@@ -1,4 +1,4 @@
-///|UUID(af06499e-fb71-4a0a-b5a3-d62368bc236a)
+///|
 pub fn[T : Eq + Hash] unique_lcs(
   old~ : ArrayView[T],
   new~ : ArrayView[T],

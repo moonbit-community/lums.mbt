@@ -1,4 +1,4 @@
-///|UUID(a0805f54-4156-44fc-83ac-7e8746b4742a)
+///|
 test {
   let a = ['a', 'b', 'c', 'd', 'e', 'f', 'a'].map(x => String::make(3, x))
   let b = ['a', 'b', 'x', 'y', 'e', 'f'].map(x => String::make(3, x))

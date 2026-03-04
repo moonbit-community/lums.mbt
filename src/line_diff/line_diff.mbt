@@ -1,4 +1,4 @@
-///|UUID(4c2d5270-58af-4c17-b558-e1bfc168d4ac)
+///|
 pub fn line_diff(
   old~ : StringView,
   new~ : StringView,

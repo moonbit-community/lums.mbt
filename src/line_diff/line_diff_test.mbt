@@ -1,4 +1,4 @@
-///|UUID(8fd4aa6e-af7f-46a1-af76-2c4347f745c7)
+///|
 fn print_hunks(
   hunks : Array[(@edit.HunkHeader, Array[(@edit.EditTag, StringView)])],
 ) -> String {
@@ -19,7 +19,7 @@ fn print_hunks(
   buf.to_string()
 }
 
-///|UUID(02038cfd-7485-43e6-8d48-5a964ca0dc28)
+///|
 test "insert/delete in middle" {
   let old =
     #|fn main() {
@@ -53,7 +53,7 @@ test "insert/delete in middle" {
   )
 }
 
-///|UUID(4eaea414-23e0-431d-b79f-ce6e8acc39ce)
+///|
 test "identical inputs" {
   let old =
     #|a
@@ -64,7 +64,7 @@ test "identical inputs" {
   inspect(print_hunks(line_diff(old~, new~, patience=true)), content="")
 }
 
-///|UUID(6d6dc575-1a01-4015-9134-b82e466c8302)
+///|
 test "insert at beginning" {
   let old =
     #|b
@@ -95,7 +95,7 @@ test "insert at beginning" {
   )
 }
 
-///|UUID(ce3c5b1e-2c7b-4d15-919f-86645bb74fd8)
+///|
 test "insert at end" {
   let old =
     #|a
@@ -126,7 +126,7 @@ test "insert at end" {
   )
 }
 
-///|UUID(f14ae326-3eca-479b-9dd4-53e84a098d66)
+///|
 test "delete at beginning" {
   let old =
     #|a
@@ -157,7 +157,7 @@ test "delete at beginning" {
   )
 }
 
-///|UUID(d7ed2179-a73f-4591-9466-58042fdd609f)
+///|
 test "delete at end" {
   let old =
     #|a
@@ -188,7 +188,7 @@ test "delete at end" {
   )
 }
 
-///|UUID(ea9a7b07-297e-46e6-8655-f2cd73769a67)
+///|
 test "blank lines and unicode" {
   let old =
     #|
@@ -228,7 +228,7 @@ test "blank lines and unicode" {
   )
 }
 
-///|UUID(df2c5ee3-d6b4-4a56-9738-d5048b8c9e64)
+///|
 test "no trailing newline behavior" {
   // Both inputs here end without a trailing newline implicitly; the lines() splitter
   // still treats them as single lines.
@@ -240,7 +240,7 @@ test "no trailing newline behavior" {
   inspect(print_hunks(line_diff(old~, new~, patience=true)), content="")
 }
 
-///|UUID(f836bc1b-4596-413e-bb9b-9038213f6667)
+///|
 test "multiple insert/delete" {
   let old =
     #|carrot
@@ -282,7 +282,7 @@ test "multiple insert/delete" {
   )
 }
 
-///|UUID(662d2ef8-951f-45fb-a808-479a2eb9b42b)
+///|
 test "large text with small hunk" {
   let old =
     #|alert

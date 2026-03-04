@@ -1,4 +1,4 @@
-///|UUID(c6602a07-bbb4-4781-8638-0b27709a127a)
+///|
 test "condense into one equal" {
   let old = [
     "apple", "pineapple", "banana", "tomato", "carrot", "tomato", "potato", "cabbage",
@@ -13,7 +13,7 @@ test "condense into one equal" {
   )
 }
 
-///|UUID(555d8748-4fd1-4436-a356-97c05e5da1a3)
+///|
 test "mixed" {
   let old = ["carrot", "tomato", "potato", "cabbage"].mut_view()
   let new = ["apple", "banana", "tomato", "pineapple"].mut_view()
@@ -26,7 +26,7 @@ test "mixed" {
   ])
 }
 
-///|UUID(6c847c67-8117-4e00-9831-892180c0ebdf)
+///|
 test "delete then insert to hunks" {
   let old = ["fn main() {", "  println(\"foo\")", "}"].mut_view()
   let new = ["fn main() {", "  println(\"bar\")", "}"].mut_view()
@@ -47,7 +47,7 @@ test "delete then insert to hunks" {
   ])
 }
 
-///|UUID(47aa9b53-bfd7-4fed-b5ee-aa26fcf4bc7b)
+///|
 test "large text to hunks" {
   let old = [
     "alert", "chop", "brave", "arise", "bring", "boy", "answer", "count", "begin",

@@ -1,6 +1,6 @@
 /// Basic algorithm described by Eugene W.Myers in: "An O(ND) Difference Algorithm and Its Variations"
 
-///|UUID(e1e65bad-69fc-48b6-ac31-e2028e98109d)
+///|
 /// A partition is the midpoint of the shortest edit script for a specified portion of two
 /// vectors.
 ///
@@ -18,7 +18,7 @@ priv struct Partition {
   hi_minimal : Bool // whether right half is optimal
 }
 
-///|UUID(737d4fa7-2e06-49ea-aa7a-111bd818f1d2)
+///|
 /// Find the midpoint of the shortest edit script for a specified portion of the two
 /// vectors.
 ///
@@ -263,7 +263,7 @@ fn[T] diag(
   }
 }
 
-///|UUID(7909378b-2125-4763-bd14-763c843c730c)
+///|
 /// Main diff loop that computes the differences between two arrays
 fn[T] diff_loop(
   cutoff : Int?, // computation cost threshold
@@ -395,7 +395,7 @@ fn[T] diff_loop(
   (chng1, chng2)
 }
 
-///|UUID(741aa078-1091-4dd6-b997-e5a24aa00fc1)
+///|
 /// `make_indexer(a b)` returns an array of the indices of items of `a` which are also
 /// present in `b`; this way, the main algorithm can skip items which, anyway, are
 /// different. This improves the speed much. At the same time, this function updates the
@@ -439,7 +439,7 @@ fn[T : Eq + Hash] make_indexer(
   result
 }
 
-///|UUID(a942f8a2-f867-46c6-a7a1-b12b8fb4a2b2)
+///|
 /// Main function that computes diff between two arrays
 fn[T : Eq + Hash] diff(
   cutoff : Int?,
@@ -456,7 +456,7 @@ fn[T : Eq + Hash] diff(
   diff_loop(cutoff, a, ai, b, bi, n, m)
 }
 
-///|UUID(f7bec95d-6588-4c8b-ba65-8b48d93481cd)
+///|
 /// `iter_matches(?cutoff, old~, new~)` diffs the arrays `old~` and `new~` (as in /usr/bin/diff),
 /// and returns index pair of longest common subsequence in increasing order. 
 ///
@@ -504,7 +504,7 @@ fn[T : Eq + Hash] iter_matches(
   Iter2::new(go)
 }
 
-///|UUID(b4dbd667-86b3-40bb-80a9-de7f0e9dc7aa)
+///|
 pub fn[T : Hash + Eq] plain_diff(
   old~ : @builtin.MutArrayView[T],
   new~ : @builtin.MutArrayView[T],
