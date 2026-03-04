@@ -1,6 +1,8 @@
 ///|
 fn print_hunks(
-  hunks : Array[(@edit.HunkHeader, Array[(@edit.EditTag, StringView)])],
+  hunks : Array[
+    (@plain_diff.HunkHeader, Array[(@plain_diff.EditTag, StringView)]),
+  ],
 ) -> String {
   let buf = StringBuilder::new()
   for hunk in hunks {

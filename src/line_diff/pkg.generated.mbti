@@ -2,11 +2,11 @@
 package "moonbit-community/piediff/line_diff"
 
 import {
-  "moonbit-community/piediff/edit",
+  "moonbit-community/piediff/plain_diff",
 }
 
 // Values
-pub fn line_diff(old~ : StringView, new~ : StringView, patience? : Bool) -> Array[(@edit.HunkHeader, Array[(@edit.EditTag, StringView)])]
+pub fn line_diff(old~ : StringView, new~ : StringView, patience? : Bool) -> Array[(@plain_diff.HunkHeader, Array[(@plain_diff.EditTag, StringView)])]
 
 // Errors
 

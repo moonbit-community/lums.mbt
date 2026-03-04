@@ -3,7 +3,7 @@ pub fn[T : Eq + Hash] patience_diff(
   old~ : @builtin.MutArrayView[T],
   new~ : @builtin.MutArrayView[T],
   cutoff? : Int,
-) -> Array[@edit.Edit] {
+) -> Array[@plain_diff.Edit] {
   let result = Array::new()
   let barriers = @unique_lcs.unique_lcs(old=old[:], new=new[:])
   let mut prev_old = 0
@@ -73,8 +73,8 @@ pub fn[T : Eq + Hash] patience_diff(
 
 ///|
 fn Array::push_and_merge_consecutive_equal(
-  self : Array[@edit.Edit],
-  edit : @edit.Edit,
+  self : Array[@plain_diff.Edit],
+  edit : @plain_diff.Edit,
 ) -> Unit {
   if self.last() is Some(Equal(..) as prev_edit) && edit is (Equal(..) as edit) {
     // not check 

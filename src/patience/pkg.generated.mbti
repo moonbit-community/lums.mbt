@@ -2,11 +2,11 @@
 package "moonbit-community/piediff/patience"
 
 import {
-  "moonbit-community/piediff/edit",
+  "moonbit-community/piediff/plain_diff",
 }
 
 // Values
-pub fn[T : Eq + Hash] patience_diff(old~ : MutArrayView[T], new~ : MutArrayView[T], cutoff? : Int) -> Array[@edit.Edit]
+pub fn[T : Eq + Hash] patience_diff(old~ : MutArrayView[T], new~ : MutArrayView[T], cutoff? : Int) -> Array[@plain_diff.Edit]
 
 // Errors
 

@@ -48,7 +48,7 @@ test "delete then insert to hunks" {
     ),
   )
   debug_inspect(
-    @edit.group_edits(edits),
+    @plain_diff.group_edits(edits),
     content=(
       #|[
       #|  [
@@ -85,7 +85,7 @@ test "large text to hunks" {
     ),
   )
   debug_inspect(
-    @edit.group_edits(edits),
+    @plain_diff.group_edits(edits),
     content=(
       #|[
       #|  [
