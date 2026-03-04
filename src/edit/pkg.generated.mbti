@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "moonbit-community/piediff/edit"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
 pub fn group_edits(Array[Edit], radius? : Int) -> Array[Array[Edit]]
 
@@ -13,8 +17,7 @@ pub(all) enum Edit {
   Equal(mut old_index~ : Int, mut new_index~ : Int, mut len~ : Int)
 }
 pub fn Edit::tag(Self) -> EditTag
-pub impl Show for Edit
-pub impl ToJson for Edit
+pub impl @debug.Debug for Edit
 
 pub enum EditTag {
   Del
