@@ -457,7 +457,7 @@ fn[T : Eq + Hash] diff(
 }
 
 ///|
-/// `iter_matches(?cutoff, old~, new~)` diffs `old` and `new` (as in /usr/bin/diff),
+/// `iter_matches(old~, new~, cutoff?)` diffs `old` and `new` (as in /usr/bin/diff),
 /// and returns index pair of longest common subsequence in increasing order. 
 ///
 /// The `cutoff` is an upper bound on the minimum edit distance between `old~` and `new~`. When
@@ -505,12 +505,19 @@ fn[T : Eq + Hash] iter_matches(
 }
 
 ///|
-/// `plain_diff(?cutoff, old~, new~)` diffs `old` and `new` (as in /usr/bin/diff),
-/// and returns edit scripts of `old` and `new`. 
+/// `plain_diff(old~, new~, cutoff?)` diffs `old` and `new` (as in /usr/bin/diff),
+/// and returns edit scripts that transforms `old` into `new`.
 ///
 /// The `cutoff` is an upper bound on the minimum edit distance between `old~` and `new~`. When
-/// `cutoff` is exceeded, `iter_matches` returns a correct, but not necessarily minimal
-/// diff. It defaults to about `sqrt(a.length() + b.length())`.
+/// `cutoff` is exceeded, `plain_diff` returns a correct, but not necessarily minimal
+/// diff. It defaults to about `sqrt(old.length() + new.length())`.
+///
+/// For performance, this function canonicalizes elements with a hash table and
+/// uses `physical_equal` internally. As a result, elements inside `old~` and
+/// `new~` may be rewritten in place to equivalent representatives.
+///
+/// Therefore, for input type `T`, any two values that satisfy `x == y` must be
+/// safely substitutable for each other.
 pub fn[T : Hash + Eq] plain_diff(
   old~ : @builtin.MutArrayView[T],
   new~ : @builtin.MutArrayView[T],
