@@ -39,14 +39,14 @@ priv struct Partition {
 /// output. It cannot cause incorrect diff output.
 ///
 /// Parameter mapping to Myers algorithm concepts:
-/// - fd~: forward search diagonal array, fd[k] stores the farthest x coordinate reachable on diagonal k
-/// - bd~: backward search diagonal array, bd[k] stores the nearest x coordinate reachable on diagonal k  
-/// - sh~: array index offset, supporting negative diagonal indices (since k can be negative)
-/// - xv~, yv~: functions to access elements of sequences A and B, supporting indirect access
-/// - xoff~, xlim~: search range for sequence A [xoff, xlim)
-/// - yoff~, ylim~: search range for sequence B [yoff, ylim)  
-/// - too_expensive~: computation cost upper limit, preventing algorithm from running too long in difficult cases
-/// - find_minimal~: whether to force finding minimal edit script (regardless of computation cost)
+/// - `fd~`: forward search diagonal array, fd[k] stores the farthest x coordinate reachable on diagonal k
+/// - `bd~`: backward search diagonal array, bd[k] stores the nearest x coordinate reachable on diagonal k  
+/// - `sh~`: array index offset, supporting negative diagonal indices (since k can be negative)
+/// - `xv~`, `yv~`: functions to access elements of sequences A and B, supporting indirect access
+/// - `xoff~`, `xlim~`: search range for sequence A [xoff, xlim)
+/// - `yoff~`, `ylim~`: search range for sequence B [yoff, ylim)  
+/// - `too_expensive~`: computation cost upper limit, preventing algorithm from running too long in difficult cases
+/// - `find_minimal~`: whether to force finding minimal edit script (regardless of computation cost)
 /// 
 fn[T] diag(
   fd~ : FixedArray[Int], // forward search diagonal array - stores farthest reachable point on each diagonal
