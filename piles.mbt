@@ -1,4 +1,9 @@
 ///|
+/// The pile array maintained while selecting a monotone chain of unique
+/// matches.
+///
+/// The patience-sorting step only compares pile tops, so each pile stores the
+/// current tail candidate for one subsequence length.
 priv struct Piles[T](Array[Pile[T]])
 
 ///|
@@ -7,6 +12,7 @@ fn[T] Piles::is_empty(self : Piles[T]) -> Bool {
 }
 
 ///|
+/// Start a new pile with a single visible card.
 fn[T] Piles::put_back(self : Piles[T], singleton : T) -> Unit {
   self.0.push(Stack::{ top: singleton, stack: @list.empty() })
 }
@@ -22,6 +28,11 @@ fn[T] Piles::op_get(self : Piles[T], i : Int) -> Pile[T] {
 }
 
 ///|
+/// Insert a unique-match candidate into the pile structure.
+///
+/// `new_idx` is the candidate index in `new~`. `place` points back into the
+/// array returned by `find_unique`, so the chosen chain can later be mapped
+/// back to `(old_idx, new_idx)` pairs.
 fn Piles::put_by_binary_search(
   self : Piles[BackPointer[(Int, Int)]],
   new_idx~ : Int,
@@ -31,6 +42,7 @@ fn Piles::put_by_binary_search(
   let mut hi = self.0.length()
   while lo + 1 < hi {
     let mid = (lo + hi) / 2
+    // Find the rightmost pile whose top still ends before `new_idx`.
     if self[mid].top.value.0 < new_idx {
       lo = mid
     } else {
@@ -39,10 +51,15 @@ fn Piles::put_by_binary_search(
   }
   if lo >= 0 {
     let prev = Some(self[lo].top)
+    // Place the candidate on the next pile; appending a new pile means the
+    // candidate extends the longest chain seen so far.
     if lo + 1 < self.0.length() {
       self[lo + 1].push(BackPointer::{ value: (new_idx, place), prev })
     } else {
       self.put_back(BackPointer::{ value: (new_idx, place), prev })
     }
+  } else {
+    // new_idx is smaller than all pile tops; place on pile 0 with no predecessor.
+    self[0].push(BackPointer::{ value: (new_idx, place), prev: None })
   }
 }

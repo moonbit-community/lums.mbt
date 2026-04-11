@@ -1,8 +1,13 @@
 ///|
+/// Collect elements that occur exactly once in both sequences.
+///
+/// The returned pairs are sorted by `old~` index so `unique_lcs` can run the
+/// patience-sorting step on the corresponding `new~` indices.
 fn[T : Eq + Hash] find_unique(
   old~ : ArrayView[T],
   new~ : ArrayView[T],
 ) -> Array[(Int, Int)] {
+  // Track where a value first appears on each side and how often it appears.
   struct CountRecord {
     old_idx : Int
     mut old_count : Int
@@ -32,6 +37,8 @@ fn[T : Eq + Hash] find_unique(
       }
     }
   }
+  // Only unique-on-both-sides values can serve as stable patience-diff
+  // anchors.
   let match_lines = match_lines
     .iter()
     .filter(p => p.1.new_count == 1 && p.1.old_count == 1)
@@ -40,6 +47,8 @@ fn[T : Eq + Hash] find_unique(
     let (_, record) = pair
     unique_match_lines.push((record.old_idx, record.new_idx))
   }
+  // Sorting by `old_idx` turns the LIS over `new_idx` into a common
+  // subsequence in both arrays.
   unique_match_lines.sort_by_key(pair => pair.0)
   return unique_match_lines
 }

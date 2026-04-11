@@ -2,26 +2,32 @@
 fn run_diag_range(
   old : Array[Int],
   new : Array[Int],
-  xoff : Int,
-  xlim : Int,
-  yoff : Int,
-  ylim : Int,
+  lhs_offset : Int,
+  lhs_limit : Int,
+  rhs_offset : Int,
+  rhs_limit : Int,
   too_expensive : Int,
   find_minimal : Bool,
 ) -> Partition {
-  let fd = FixedArray::make(old.length() + new.length() + 3, 0)
-  let bd = FixedArray::make(old.length() + new.length() + 3, 0)
-  let sh = new.length() + 1
+  let forward_search_diagonal = FixedArray::make(
+    old.length() + new.length() + 3,
+    0,
+  )
+  let backward_search_diagonal = FixedArray::make(
+    old.length() + new.length() + 3,
+    0,
+  )
+  let diagonal_shift = new.length() + 1
   diag(
-    fd~,
-    bd~,
-    sh~,
-    xv=fn(i) { old[i] },
-    yv=fn(i) { new[i] },
-    xoff~,
-    xlim~,
-    yoff~,
-    ylim~,
+    forward_search_diagonal~,
+    backward_search_diagonal~,
+    diagonal_shift~,
+    lhs_get=fn(i) { old[i] },
+    rhs_get=fn(i) { new[i] },
+    lhs_offset~,
+    lhs_limit~,
+    rhs_offset~,
+    rhs_limit~,
     too_expensive~,
     find_minimal~,
   )
@@ -60,8 +66,8 @@ test "diag reaches lower diagonal boundary when old is longer" {
   let partition = run_diag([1, 2, 3, 4, 5], [10], 1024, true)
   assert_true(partition.lo_minimal)
   assert_true(partition.hi_minimal)
-  assert_true(partition.xmid >= 0 && partition.xmid <= 5)
-  assert_true(partition.ymid >= 0 && partition.ymid <= 1)
+  assert_true(partition.lhs_midpoint >= 0 && partition.lhs_midpoint <= 5)
+  assert_true(partition.rhs_midpoint >= 0 && partition.rhs_midpoint <= 1)
 }
 
 ///|
@@ -69,8 +75,8 @@ test "diag reaches upper diagonal boundary when new is longer" {
   let partition = run_diag([1], [10, 11, 12, 13, 14], 1024, true)
   assert_true(partition.lo_minimal)
   assert_true(partition.hi_minimal)
-  assert_true(partition.xmid >= 0 && partition.xmid <= 1)
-  assert_true(partition.ymid >= 0 && partition.ymid <= 5)
+  assert_true(partition.lhs_midpoint >= 0 && partition.lhs_midpoint <= 1)
+  assert_true(partition.rhs_midpoint >= 0 && partition.rhs_midpoint <= 5)
 }
 
 ///|
@@ -82,8 +88,8 @@ test "diag odd parity can return from forward search" {
 
 ///|
 test "diag heuristic path can choose either side" {
-  let saw_forward = Ref::new(false)
-  let saw_backward = Ref::new(false)
+  let saw_forward = @ref.Ref::new(false)
+  let saw_backward = @ref.Ref::new(false)
   for n = 3; n <= 8; n = n + 1 {
     for m = 3; m <= 8; m = m + 1 {
       for old_shift = 0; old_shift < 5; old_shift = old_shift + 1 {
@@ -96,10 +102,10 @@ test "diag heuristic path can choose either side" {
                 let partition = run_diag_range(
                   old, new, xoff, n, yoff, m, 0, false,
                 )
-                if partition.lo_minimal && not(partition.hi_minimal) {
+                if partition.lo_minimal && !partition.hi_minimal {
                   saw_forward.val = true
                 }
-                if not(partition.lo_minimal) && partition.hi_minimal {
+                if !partition.lo_minimal && partition.hi_minimal {
                   saw_backward.val = true
                 }
               }

@@ -1,5 +1,0 @@
-import {
-  "moonbit-community/piediff/unique_lcs",
-  "moonbit-community/piediff/plain_diff",
-  "moonbitlang/core/builtin",
-}

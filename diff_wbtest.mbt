@@ -1,8 +1,8 @@
 ///|
 fn print_edits(
   cutoff? : Int,
-  old : MutArrayView[String],
-  new : MutArrayView[String],
+  old : ArrayView[String],
+  new : ArrayView[String],
 ) -> String {
   let mut prev_old_idx = 0
   let mut prev_new_idx = 0
@@ -35,7 +35,7 @@ test {
   let old = ['a', 'b', 'c', 'd', 'e'].map(x => String::make(3, x))
   let new = ['a', 'x', 'c', 'y', 'e', 'z'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|-  bbb
@@ -54,7 +54,7 @@ test {
   let old = ['a', 'o', 'b', 'c'].map(x => String::make(3, x))
   let new = ['a', 'e', 'b', 'c'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|-  ooo
@@ -70,7 +70,7 @@ test "identical arrays" {
   let old = ['a', 'b', 'c', 'd', 'e'].map(x => String::make(3, x))
   let new = ['a', 'b', 'c', 'd', 'e'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|   bbb
@@ -86,7 +86,7 @@ test "completely different arrays" {
   let old = ['a', 'b', 'c'].map(x => String::make(3, x))
   let new = ['x', 'y', 'z'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|-  aaa
       #|-  bbb
@@ -103,7 +103,7 @@ test "fully insert" {
   let old : Array[String] = []
   let new = ['a', 'b', 'c'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|+  aaa
       #|+  bbb
@@ -117,7 +117,7 @@ test "fully delete" {
   let old = ['a', 'b', 'c'].map(x => String::make(3, x))
   let new : Array[String] = []
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|-  aaa
       #|-  bbb
@@ -131,7 +131,7 @@ test "insert at beginning" {
   let old = ['b', 'c', 'd'].map(x => String::make(3, x))
   let new = ['a', 'b', 'c', 'd'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|+  aaa
       #|   bbb
@@ -146,7 +146,7 @@ test "insert at end" {
   let old = ['a', 'b', 'c'].map(x => String::make(3, x))
   let new = ['a', 'b', 'c', 'd'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|   bbb
@@ -161,7 +161,7 @@ test "delete at beginning" {
   let old = ['a', 'b', 'c', 'd'].map(x => String::make(3, x))
   let new = ['b', 'c', 'd'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|-  aaa
       #|   bbb
@@ -176,7 +176,7 @@ test "delete at end" {
   let old = ['a', 'b', 'c', 'd'].map(x => String::make(3, x))
   let new = ['a', 'b', 'c'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|   bbb
@@ -191,7 +191,7 @@ test "insert multiple in middle" {
   let old = ['a', 'b', 'e', 'f'].map(x => String::make(3, x))
   let new = ['a', 'b', 'c', 'd', 'e', 'f'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|   bbb
@@ -208,7 +208,7 @@ test "delete multiple in middle" {
   let old = ['a', 'b', 'c', 'd', 'e', 'f'].map(x => String::make(3, x))
   let new = ['a', 'b', 'e', 'f'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|   bbb
@@ -225,7 +225,7 @@ test "arrays with duplicates" {
   let old = ['a', 'b', 'a', 'c'].map(x => String::make(3, x))
   let new = ['a', 'a', 'b', 'c'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|-  bbb
@@ -241,7 +241,7 @@ test "single element arrays" {
   let old = ['a'].map(x => String::make(3, x))
   let new = ['b'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|-  aaa
       #|+  bbb
@@ -258,7 +258,7 @@ test "long sequence LCS" {
     String::make(3, x0)
   })
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|-  bbb
@@ -284,7 +284,7 @@ test "reverse order" {
   let old = ['a', 'b', 'c', 'd'].map(x => String::make(3, x))
   let new = ['d', 'c', 'b', 'a'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|-  aaa
       #|-  bbb
@@ -299,8 +299,8 @@ test "reverse order" {
 
 ///|
 test "integer arrays diff" {
-  let old = [1, 2, 3, 4, 5].mut_view()
-  let new = [1, 3, 5, 6, 7].mut_view()
+  let old = [1, 2, 3, 4, 5][:]
+  let new = [1, 3, 5, 6, 7][:]
   let result = Array::new()
   for old_idx, new_idx in iter_matches(old~, new~, cutoff=None) {
     result.push((old_idx, new_idx))
@@ -315,7 +315,7 @@ test "many duplicate elements" {
   let old = ['a', 'a', 'a', 'b', 'a', 'a'].map(x => String::make(3, x))
   let new = ['a', 'a', 'b', 'a', 'a', 'a'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|   aaa
@@ -333,7 +333,7 @@ test "alternating pattern" {
   let old = ['a', 'b', 'a', 'b', 'a', 'b'].map(x => String::make(3, x))
   let new = ['b', 'a', 'b', 'a', 'b', 'a'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|-  aaa
       #|   bbb
@@ -351,7 +351,7 @@ test "nested insertions and deletions" {
   let old = ['a', 'x', 'b', 'y', 'c', 'z', 'd'].map(x => String::make(3, x))
   let new = ['a', 'b', 'c', 'd', 'e'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|-  xxx
@@ -367,8 +367,8 @@ test "nested insertions and deletions" {
 
 ///|
 test "iter_matches callback verification" {
-  let old = ['a', 'b', 'c', 'd'].map(x => String::make(3, x)).mut_view()
-  let new = ['a', 'x', 'c', 'y'].map(x => String::make(3, x)).mut_view()
+  let old = ['a', 'b', 'c', 'd'].map(x => String::make(3, x))[:]
+  let new = ['a', 'x', 'c', 'y'].map(x => String::make(3, x))[:]
   let matches = Array::new()
   let old_indices = Array::new()
   let new_indices = Array::new()
@@ -393,8 +393,8 @@ test "iter_matches callback verification" {
 
 ///|
 test "string array edge cases" {
-  let old = ["", "a", "", "b", ""].mut_view()
-  let new = ["", "b", "", "a", ""].mut_view()
+  let old = ["", "a", "", "b", ""][:]
+  let new = ["", "b", "", "a", ""][:]
   let result = Array::new()
   for old_idx, new_idx in iter_matches(old~, new~, cutoff=None) {
     result.push((old_idx, new_idx))
@@ -415,13 +415,8 @@ test "large array performance" {
     old[i] = i
     new[i] = if i % 2 == 0 { i } else { i + 100 } // Half same, half different
   }
-  let match_count = Ref::new(0)
-  for
-    _old_idx, _new_idx in iter_matches(
-      old=old.mut_view(),
-      new=new.mut_view(),
-      cutoff=None,
-    ) {
+  let match_count = @ref.Ref::new(0)
+  for _old_idx, _new_idx in iter_matches(old=old[:], new=new[:], cutoff=None) {
     match_count.val = match_count.val + 1
   }
 
@@ -435,7 +430,7 @@ test "single difference" {
   let old = ['a', 'b', 'c', 'd', 'e'].map(x => String::make(3, x))
   let new = ['a', 'b', 'x', 'd', 'e'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|   aaa
       #|   bbb
@@ -452,7 +447,7 @@ test "very short arrays" {
   let old = ['a'].map(x => String::make(3, x))
   let new : Array[String] = []
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|-  aaa
     ),
@@ -464,7 +459,7 @@ test "partial overlap sequence" {
   let old = ['a', 'b', 'c', 'd'].map(x => String::make(3, x))
   let new = ['c', 'd', 'e', 'f'].map(x => String::make(3, x))
   inspect(
-    print_edits(old.mut_view(), new.mut_view()),
+    print_edits(old[:], new[:]),
     content=(
       #|-  aaa
       #|-  bbb
@@ -478,10 +473,10 @@ test "partial overlap sequence" {
 
 ///|
 test "iter_matches parameter order" {
-  let old = ['a', 'b', 'c'].map(x => String::make(3, x)).mut_view()
-  let new = ['a', 'x', 'c'].map(x => String::make(3, x)).mut_view()
+  let old = ['a', 'b', 'c'].map(x => String::make(3, x))[:]
+  let new = ['a', 'x', 'c'].map(x => String::make(3, x))[:]
   let matches = Array::new()
-  let all_equal = Ref::new(true)
+  let all_equal = @ref.Ref::new(true)
   for old_idx, new_idx in iter_matches(old~, new~, cutoff=None) {
     // Verify parameter order: old_idx should correspond to old array, new_idx to new array
     let old_val = old[old_idx]
@@ -500,8 +495,8 @@ test "iter_matches parameter order" {
 
 ///|
 test "repeated subsequence" {
-  let old = ['a', 'b', 'a', 'b', 'c'].map(x => String::make(3, x)).mut_view()
-  let new = ['a', 'b', 'c', 'a', 'b'].map(x => String::make(3, x)).mut_view()
+  let old = ['a', 'b', 'a', 'b', 'c'].map(x => String::make(3, x))[:]
+  let new = ['a', 'b', 'c', 'a', 'b'].map(x => String::make(3, x))[:]
   let result = Array::new()
   for old_idx, new_idx in iter_matches(old~, new~, cutoff=None) {
     result.push((old_idx, new_idx))
@@ -513,8 +508,8 @@ test "repeated subsequence" {
 
 ///|
 test "diff symmetry test" {
-  let arr1 = ['a', 'b', 'c'].map(x => String::make(3, x)).mut_view()
-  let arr2 = ['a', 'x', 'c'].map(x => String::make(3, x)).mut_view()
+  let arr1 = ['a', 'b', 'c'].map(x => String::make(3, x))[:]
+  let arr2 = ['a', 'x', 'c'].map(x => String::make(3, x))[:]
 
   // Calculate diff from arr1 -> arr2
   let matches1 = Array::new()
@@ -544,7 +539,7 @@ test "diff sub array" {
   ]
   assert_eq(old, new)
   inspect(
-    print_edits(old.mut_view(end=4), new.mut_view(end=5)),
+    print_edits(old[:4], new[:5]),
     content=(
       #|   Apple
       #|   Banana
@@ -554,7 +549,7 @@ test "diff sub array" {
     ),
   )
   inspect(
-    print_edits(old.mut_view(start=4), new.mut_view(start=5)),
+    print_edits(old[4:], new[5:]),
     content=(
       #|-  Strawberry
       #|   Watermelon
