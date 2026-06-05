@@ -307,7 +307,7 @@ test "integer arrays diff" {
   }
 
   // Should find matching elements: (0,0)=1, (2,1)=3, (4,2)=5
-  inspect(result, content="[(0, 0), (2, 1), (4, 2)]")
+  debug_inspect(result, content="[(0, 0), (2, 1), (4, 2)]")
 }
 
 ///|
@@ -415,7 +415,7 @@ test "large array performance" {
     old[i] = i
     new[i] = if i % 2 == 0 { i } else { i + 100 } // Half same, half different
   }
-  let match_count = @ref.Ref::new(0)
+  let match_count = @ref.Ref(0)
   for _old_idx, _new_idx in iter_matches(old=old[:], new=new[:], cutoff=None) {
     match_count.val = match_count.val + 1
   }
@@ -476,7 +476,7 @@ test "iter_matches parameter order" {
   let old = ['a', 'b', 'c'].map(x => String::make(3, x))[:]
   let new = ['a', 'x', 'c'].map(x => String::make(3, x))[:]
   let matches = Array::new()
-  let all_equal = @ref.Ref::new(true)
+  let all_equal = @ref.Ref(true)
   for old_idx, new_idx in iter_matches(old~, new~, cutoff=None) {
     // Verify parameter order: old_idx should correspond to old array, new_idx to new array
     let old_val = old[old_idx]
@@ -537,7 +537,7 @@ test "diff sub array" {
     "Apple", "Banana", "Orange", "Grape", "Strawberry", "Watermelon", "Peach", "Pear",
     "Pineapple", "Cherry",
   ]
-  assert_eq(old, new)
+  @debug.assert_eq(old, new)
   inspect(
     print_edits(old[:4], new[:5]),
     content=(

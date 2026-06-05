@@ -6,7 +6,6 @@ import {
 }
 
 // Values
-pub fn[T : Eq + Hash] unique_lcs(old~ : ArrayView[T], new~ : ArrayView[T]) -> ArrayView[(Int, Int)]
 
 // Errors
 
@@ -15,9 +14,8 @@ pub struct Diff[T] {
   old : ArrayView[T]
   new : ArrayView[T]
   edits : Array[Edit]
-
-  fn[T : Hash + Eq] new(old~ : ArrayView[T], new~ : ArrayView[T], cutoff? : Int, algorithm? : DiffAlgorithm) -> Diff[T]
 }
+pub fn[T : Hash + Eq] Diff::Diff(old~ : ArrayView[T], new~ : ArrayView[T], cutoff? : Int, algorithm? : DiffAlgorithm) -> Self[T]
 pub fn[T] Diff::group(Self[T], radius? : Int) -> Array[Hunk[T]]
 
 pub(all) enum DiffAlgorithm {

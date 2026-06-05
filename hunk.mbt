@@ -2,7 +2,7 @@
 priv struct Range(Int, Int) // line number, length
 
 ///|
-impl Show for Range with output(self, logger) {
+impl Show for Range with fn output(self, logger) {
   let mut beginning = self.0 + 1 // from array index to line number
   let len = self.1 - self.0
   if len == 1 {
@@ -52,7 +52,7 @@ fn HunkHeader::new(edits : ArrayView[Edit]) -> Self {
 }
 
 ///|
-impl Show for HunkHeader with output(self, logger) {
+impl Show for HunkHeader with fn output(self, logger) {
   logger.write_string("@@ -\{self.0} +\{self.1} @@")
 }
 
@@ -64,7 +64,7 @@ pub struct Hunk[T] {
 }
 
 ///|
-pub impl[T : Show] Show for Hunk[T] with output(self, logger) {
+pub impl[T : Show] Show for Hunk[T] with fn output(self, logger) {
   let header = HunkHeader::new(self.edits).to_string()
   logger.write_string(header)
   logger.write_char('\n')

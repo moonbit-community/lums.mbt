@@ -422,7 +422,7 @@ fn[T : Eq + Hash] make_indexer(
   b : ArrayView[T],
 ) -> FixedArray[Int] {
   let n = a.length()
-  let present : Map[T, Bool] = Map::new(capacity=b.length())
+  let present : Map[T, Bool] = Map([], capacity=b.length())
 
   for i = 0; i < b.length(); i = i + 1 {
     present[b[i]] = true
@@ -597,13 +597,6 @@ pub struct Diff[T] {
   old : ArrayView[T]
   new : ArrayView[T]
   edits : Array[Edit]
-
-  fn[T : Hash + Eq] new(
-    old~ : ArrayView[T],
-    new~ : ArrayView[T],
-    cutoff? : Int,
-    algorithm? : DiffAlgorithm,
-  ) -> Diff[T]
 }
 
 ///|
@@ -620,7 +613,7 @@ pub struct Diff[T] {
 /// classic Myers O(ND) algorithm. `Patience` first finds elements unique to
 /// both inputs as anchors, then runs Myers on the unmatched ranges between them.
 ///
-fn[T : Hash + Eq] Diff::new(
+pub fn[T : Hash + Eq] Diff::Diff(
   old~ : ArrayView[T],
   new~ : ArrayView[T],
   cutoff? : Int,

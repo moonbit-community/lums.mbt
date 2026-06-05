@@ -9,7 +9,7 @@
 ///
 /// The returned `(old_idx, new_idx)` pairs are increasing in both arrays and serve as the
 /// anchor matches for diffing the remaining unmatched ranges.
-pub fn[T : Eq + Hash] unique_lcs(
+fn[T : Eq + Hash] unique_lcs(
   old~ : ArrayView[T],
   new~ : ArrayView[T],
 ) -> ArrayView[(Int, Int)] {

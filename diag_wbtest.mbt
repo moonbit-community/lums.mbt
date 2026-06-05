@@ -88,8 +88,8 @@ test "diag odd parity can return from forward search" {
 
 ///|
 test "diag heuristic path can choose either side" {
-  let saw_forward = @ref.Ref::new(false)
-  let saw_backward = @ref.Ref::new(false)
+  let saw_forward = @ref.Ref(false)
+  let saw_backward = @ref.Ref(false)
   for n = 3; n <= 8; n = n + 1 {
     for m = 3; m <= 8; m = m + 1 {
       for old_shift = 0; old_shift < 5; old_shift = old_shift + 1 {

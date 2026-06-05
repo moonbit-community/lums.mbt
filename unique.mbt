@@ -1,3 +1,13 @@
+// Track where a value first appears on each side and how often it appears.
+
+///|
+priv struct CountRecord {
+  old_idx : Int
+  mut old_count : Int
+  mut new_idx : Int
+  mut new_count : Int
+}
+
 ///|
 /// Collect elements that occur exactly once in both sequences.
 ///
@@ -7,14 +17,7 @@ fn[T : Eq + Hash] find_unique(
   old~ : ArrayView[T],
   new~ : ArrayView[T],
 ) -> Array[(Int, Int)] {
-  // Track where a value first appears on each side and how often it appears.
-  struct CountRecord {
-    old_idx : Int
-    mut old_count : Int
-    mut new_idx : Int
-    mut new_count : Int
-  }
-  let match_lines = @hashmap.new()
+  let match_lines = @hashmap.HashMap([])
   for i = 0; i < old.length(); i = i + 1 {
     if match_lines.contains(old[i]) {
       let count_record : CountRecord = match_lines.get(old[i]).unwrap()

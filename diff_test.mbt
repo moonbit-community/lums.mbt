@@ -43,7 +43,7 @@ struct User {
 } derive(Hash, Eq)
 
 ///|
-impl Show for User with output(self, logger) {
+impl Show for User with fn output(self, logger) {
   logger.write_string(
     "User { id: " + self.id.to_string() + ", name: " + self.name + " }",
   )
@@ -58,7 +58,7 @@ enum Token {
 } derive(Hash, Eq)
 
 ///|
-impl Show for Token with output(self, logger) {
+impl Show for Token with fn output(self, logger) {
   match self {
     Start => logger.write_string("Start")
     Stop => logger.write_string("Stop")
@@ -75,7 +75,7 @@ test "condense into one equal" {
   let new = [
       "apple", "pineapple", "banana", "tomato", "carrot", "tomato", "potato", "cabbage",
     ][:]
-  assert_eq(old, new)
+  @debug.assert_eq(old, new)
   let d = @piediff.Diff(old~, new~)
   let patience = @piediff.Diff(old~, new~, algorithm=@piediff.Patience)
   inspect(
