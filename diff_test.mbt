@@ -443,15 +443,19 @@ test "patience diff prefers unique anchors" {
   )
 }
 
+///|
 test {
   let old = ['A', 'B', 'B']
   let new = ['B', 'A', 'B', 'X']
   let myers = @piediff.Diff(old~, new~)
-  inspect(edits_to_string(myers), content=(
-    #|- A
-    #|  B
-    #|+ A
-    #|  B
-    #|+ X
-  ))
+  inspect(
+    edits_to_string(myers),
+    content=(
+      #|- A
+      #|  B
+      #|+ A
+      #|  B
+      #|+ X
+    ),
+  )
 }

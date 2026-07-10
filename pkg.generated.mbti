@@ -34,7 +34,17 @@ pub struct Hunk[T] {
   old : ArrayView[T]
   new : ArrayView[T]
 }
+pub fn[T] Hunk::header(Self[T]) -> HunkHeader
 pub impl[T : Show] Show for Hunk[T]
+
+pub struct HunkHeader {
+  old : Range
+  new : Range
+}
+pub impl Show for HunkHeader
+
+pub struct Range(Int, Int)
+pub impl Show for Range
 
 // Type aliases
 

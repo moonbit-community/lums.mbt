@@ -37,11 +37,11 @@ test "group_edit splits long equal blocks into multiple hunks" {
 ///|
 test "range display for single and empty span" {
   inspect(
-    HunkHeader::new([Equal(old_index=4, new_index=2, len=1)]).to_string(),
+    HunkHeader([Equal(old_index=4, new_index=2, len=1)]).to_string(),
     content="@@ -5 +3 @@",
   )
   inspect(
-    HunkHeader::new([Insert(old_index=4, new_index=2, len=1)]).to_string(),
+    HunkHeader([Insert(old_index=4, new_index=2, len=1)]).to_string(),
     content="@@ -4,0 +3 @@",
   )
 }
@@ -49,7 +49,7 @@ test "range display for single and empty span" {
 ///|
 test "range display spans replacement ending with insert" {
   inspect(
-    HunkHeader::new([
+    HunkHeader([
       Delete(old_index=1, new_index=1, len=1),
       Insert(old_index=1, new_index=1, len=1),
     ]).to_string(),

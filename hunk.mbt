@@ -1,8 +1,9 @@
 ///|
-priv struct Range(Int, Int) // line number, length
+/// Range(<line number>, <length>)
+pub struct Range(Int, Int)
 
 ///|
-impl Show for Range with fn output(self, logger) {
+pub impl Show for Range with fn output(self, logger) {
   let mut beginning = self.0 + 1 // from array index to line number
   let len = self.1 - self.0
   if len == 1 {
@@ -19,11 +20,14 @@ impl Show for Range with fn output(self, logger) {
 }
 
 ///|
-priv struct HunkHeader(Range, Range)
+pub struct HunkHeader {
+  old : Range
+  new : Range
+}
 
 ///|
 /// Creates a hunk header from a (non empty) array of edit
-fn HunkHeader::new(edits : ArrayView[Edit]) -> Self {
+fn HunkHeader::HunkHeader(edits : ArrayView[Edit]) -> Self {
   let (first_old_start, first_old_end) = edits[0].old_range()
   let (first_new_start, first_new_end) = edits[0].new_range()
   let mut old_end = first_old_end
@@ -48,12 +52,15 @@ fn HunkHeader::new(edits : ArrayView[Edit]) -> Self {
       break
     }
   }
-  HunkHeader(Range(first_old_start, old_end), Range(first_new_start, new_end))
+  HunkHeader::{
+    old: Range(first_old_start, old_end),
+    new: Range(first_new_start, new_end),
+  }
 }
 
 ///|
-impl Show for HunkHeader with fn output(self, logger) {
-  logger.write_string("@@ -\{self.0} +\{self.1} @@")
+pub impl Show for HunkHeader with fn output(self, logger) {
+  logger.write_string("@@ -\{self.old} +\{self.new} @@")
 }
 
 ///|
@@ -64,8 +71,13 @@ pub struct Hunk[T] {
 }
 
 ///|
+pub fn[T] Hunk::header(self : Hunk[T]) -> HunkHeader {
+  HunkHeader(self.edits)
+}
+
+///|
 pub impl[T : Show] Show for Hunk[T] with fn output(self, logger) {
-  let header = HunkHeader::new(self.edits).to_string()
+  let header = HunkHeader(self.edits).to_string()
   logger.write_string(header)
   logger.write_char('\n')
   for edit in self.edits {
