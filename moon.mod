@@ -8,6 +8,6 @@ repository = "https://github.com/moonbit-community/piediff"
 
 license = "Apache-2.0"
 
-keywords = ["diff", "patience diff"]
+keywords = [ "diff", "patience diff" ]
 
 description = "A MoonBit implementation of Bram Cohen's patience diff algorithm (also provides a basic Myers diff)"
