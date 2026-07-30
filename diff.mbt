@@ -146,9 +146,8 @@ fn[T : Eq] diag(
     }
 
     // If forward search found solution, return directly
-    match forward_result {
-      Some(result) => break result
-      None => ()
+    if forward_result is Some(result) {
+      break result
     }
 
     // Similarly extend diagonal range for backward search
@@ -207,9 +206,8 @@ fn[T : Eq] diag(
     }
 
     // If backward search found solution, return directly
-    match backward_result {
-      Some(result) => break result
-      None => ()
+    if backward_result is Some(result) {
+      break result
     }
 
     // Heuristic handling: if computation cost too high, abandon finding optimal solution
@@ -297,20 +295,19 @@ fn[T : Eq] diff_loop(
   let diagonal_shift = m + 1 // m=rhs_indices.length(); shift k by m+1 so [-(m+1), n+1] -> [0, n+m+2] in arrays of size n+m+3
 
   // Determine computation cost threshold
-  let too_expensive = match cutoff {
-    Some(c) => c
-    None => {
-      // Default strategy: calculate reasonable threshold based on problem size
-      // Use bit operations to quickly compute approximate square root
-      let diags = n + m + 3
-      let mut result = 1
-      let mut diags_cur = diags
-      while diags_cur != 0 {
-        diags_cur = diags_cur >> 2
-        result = result << 1
-      }
-      result.max(4096) // at least 4096, ensuring reasonable performance
+  let too_expensive = if cutoff is Some(c) {
+    c
+  } else {
+    // Default strategy: calculate reasonable threshold based on problem size
+    // Use bit operations to quickly compute approximate square root
+    let diags = n + m + 3
+    let mut result = 1
+    let mut diags_cur = diags
+    while diags_cur != 0 {
+      diags_cur = diags_cur >> 2
+      result = result << 1
     }
+    result.max(4096) // at least 4096, ensuring reasonable performance
   }
 
   // Create element access functions - supporting indirect access
@@ -424,19 +421,16 @@ fn[T : Eq + Hash] make_indexer(
   let n = a.length()
   let present : Map[T, Bool] = Map([], capacity=b.length())
 
-  for i = 0; i < b.length(); i = i + 1 {
-    present[b[i]] = true
+  for value in b {
+    present[value] = true
   }
   let ai = FixedArray::make(n, 0) // temporary storage for valid indices
   let mut k = 0 // valid element count
 
   for i = 0; i < n; i = i + 1 {
-    match present.get(a[i]) {
-      Some(_) => {
-        ai[k] = i // record original index of this element
-        k += 1
-      }
-      None => () // doesn't exist in b, skip
+    if present.get(a[i]) is Some(_) {
+      ai[k] = i // record original index of this element
+      k += 1
     }
   }
   let result = FixedArray::make(k, 0)
@@ -546,8 +540,8 @@ fn[T : Eq + Hash] append_patience_matches(
   // so unmatched gaps fall back to Myers instead of recursing.
   let mut prev_old_idx = 0
   let mut prev_new_idx = 0
-  for i = 0; i < anchors.length(); i = i + 1 {
-    let (old_idx, new_idx) = anchors[i]
+  for anchor in anchors {
+    let (old_idx, new_idx) = anchor
     append_myers_matches(
       matches,
       cutoff,

@@ -21,7 +21,7 @@ fn[T : Eq + Hash] find_unique(
   for i = 0; i < old.length(); i = i + 1 {
     if match_lines.contains(old[i]) {
       let count_record : CountRecord = match_lines.get(old[i]).unwrap()
-      count_record.old_count = count_record.old_count + 1
+      count_record.old_count += 1
     } else {
       match_lines[old[i]] = CountRecord::{
         old_idx: i,
@@ -34,7 +34,7 @@ fn[T : Eq + Hash] find_unique(
   for i = 0; i < new.length(); i = i + 1 {
     if match_lines.contains(new[i]) {
       let count_record = match_lines.get(new[i]).unwrap()
-      count_record.new_count = count_record.new_count + 1
+      count_record.new_count += 1
       if count_record.new_idx == -1 {
         count_record.new_idx = i
       }

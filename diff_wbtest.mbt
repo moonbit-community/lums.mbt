@@ -379,15 +379,15 @@ test "iter_matches callback verification" {
   }
 
   // Verify that matched elements are indeed equal
-  for i = 0; i < matches.length(); i = i + 1 {
-    let (old_idx, new_idx) = matches[i]
-    inspect(old[old_idx] == new[new_idx], content="true")
+  for matched_indices in matches {
+    let (old_idx, new_idx) = matched_indices
+    assert_true(old[old_idx] == new[new_idx])
   }
 
   // Verify that indices are increasing
   for i = 1; i < old_indices.length(); i = i + 1 {
-    inspect(old_indices[i] > old_indices[i - 1], content="true")
-    inspect(new_indices[i] > new_indices[i - 1], content="true")
+    assert_true(old_indices[i] > old_indices[i - 1])
+    assert_true(new_indices[i] > new_indices[i - 1])
   }
 }
 
@@ -401,7 +401,7 @@ test "string array edge cases" {
   }
 
   // Should find some matches (empty strings will match)
-  inspect(result.length() > 0, content="true")
+  assert_true(result.length() > 0)
 }
 
 ///|
@@ -417,12 +417,12 @@ test "large array performance" {
   }
   let match_count = @ref.Ref(0)
   for _old_idx, _new_idx in iter_matches(old=old[:], new=new[:], cutoff=None) {
-    match_count.val = match_count.val + 1
+    match_count.val += 1
   }
 
   // Should find approximately half matches
-  inspect(match_count.val > 10, content="true")
-  inspect(match_count.val < 40, content="true")
+  assert_true(match_count.val > 10)
+  assert_true(match_count.val < 40)
 }
 
 ///|
@@ -490,7 +490,7 @@ test "iter_matches parameter order" {
   // Verify that all matched elements are indeed equal
   assert_true(all_equal.val)
   // Should have matches for 'a' and 'c'
-  inspect(matches.length(), content="2")
+  assert_eq(matches.length(), 2)
 }
 
 ///|
@@ -503,7 +503,7 @@ test "repeated subsequence" {
   }
 
   // Verify that some matches were found
-  inspect(result.length() >= 3, content="true")
+  assert_true(result.length() >= 3)
 }
 
 ///|
